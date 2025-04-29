@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import "./assets/font/stylesheet.css";
+* {
+  font-family: 'Spotify Mix';
+}
+  @theme {
+  --color-btns: #F0F0F0;
+  --color-main-black: #000000;
+  --color-second-black: #121212;
+  --color-shadow-black: #202020;
+  --color-hover-black: #1F1F1F;
+  --color-heading: #FFFFFF;
+  --color-search-dark: #2A2A2A;
+  --color-gray: #b3b3b3;
+  --color-green: #1DB954;
+}
+
+body {
+  background-color: #000000;
+}
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+.container {
+  padding: 0 15px;
+  margin: 0 auto;
+}
+
+.popular-rec .content .box  .play {
+  transition: 0.5s;
+}
+.popular-rec .content .box:hover  .play {
+  display: flex;
+  right: 8px;
+  bottom: 8px;
+  opacity: 1;
+  transform: rotate(0deg);
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1 }
+  50% { opacity: 0.5 }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #1a1a1a 25%, #2d2d2d 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
