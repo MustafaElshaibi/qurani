@@ -1,5 +1,6 @@
 // librariesSlice.js
 import { createSlice } from "@reduxjs/toolkit";
+import { debounce } from "lodash";
 
 // System libraries configuration (always first)
 const SYSTEM_LIBRARIES = [
@@ -91,7 +92,7 @@ const librariesSlice = createSlice({
       } else {
         favoritesLib.items.splice(songIndex, 1);
       }
-      persistState(state);
+      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
     },
 
     // Create new library (insert after system libraries)
@@ -105,7 +106,7 @@ const librariesSlice = createSlice({
           state.libraries.splice(insertIndex, 0, action.payload);
         }
         state.activeLibraryId = action.payload.id;
-        persistState(state);
+        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
       },
       prepare: (name) => ({
         payload: {
@@ -124,7 +125,7 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library?.type === "user" && newName.trim()) {
         library.name = newName.trim();
-        persistState(state);
+        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
       }
     },
 
@@ -140,14 +141,14 @@ const librariesSlice = createSlice({
       if (state.activeLibraryId === libraryId) {
         state.activeLibraryId = "favorites";
       }
-      persistState(state);
+      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
     },
 
     // Set active library (with system fallback)
     setActiveLibrary: (state, action) => {
       const isValid = state.libraries.some((l) => l.id === action.payload);
       state.activeLibraryId = isValid ? action.payload : "favorites";
-      persistState(state);
+      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
     },
 
     // Reorder libraries (user libraries only)
@@ -159,7 +160,7 @@ const librariesSlice = createSlice({
       userLibs.splice(action.payload.endIndex, 0, removed);
 
       state.libraries = [...systemLibs, ...userLibs];
-      persistState(state);
+      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
     },
 
     // Add song to specific library
@@ -168,7 +169,7 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library && !library.items.some((s) => s.id === song.id)) {
         library.items.push(song);
-        persistState(state);
+        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
       }
     },
 
@@ -178,7 +179,7 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library) {
         library.items = library.items.filter((s) => s.id !== songId);
-        persistState(state);
+        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
       }
     },
   },
@@ -193,6 +194,10 @@ export const selectActiveLibrary = (state) =>
 
 export const selectIsFavorite = (state, songId) => {
   const favorites = state.libraries.libraries.find((l) => l.id === "favorites");
+  return favorites?.items.some((s) => s.id === songId) || false;
+};
+export const selectIsInPlayList = (state,libId, songId) => {
+  const favorites = state.libraries.libraries.find((l) => l.id === libId);
   return favorites?.items.some((s) => s.id === songId) || false;
 };
 

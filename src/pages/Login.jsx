@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FaFacebook, FaQuran } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { loginWithEmail, logOut, signWithGoogle } from "../rtk/Reducers/AuthReducer";
+import { loginWithEmail, signWithGoogle } from "../rtk/Reducers/AuthReducer";
 import { FcGoogle } from "react-icons/fc";
 import { ImAppleinc } from "react-icons/im";
 import { ErrorPage } from "./Error";

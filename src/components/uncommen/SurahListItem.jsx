@@ -1,22 +1,24 @@
 
 
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FaPause, FaPlay, FaMosque } from "react-icons/fa";
 import { LiaKaabaSolid } from "react-icons/lia";
 import { useDispatch, useSelector } from "react-redux";
 import { playTrack, togglePlayPause } from "../../rtk/Reducers/PlayerReducer";
 import Cookies from "universal-cookie";
 import ModualSignIn from "./ModualSignIn";
-import {  useNavigate } from "react-router-dom";
+import {  Link, useNavigate } from "react-router-dom";
 import HeartFavorite from "./HeartFavorite";
-import { addToLibrary } from "../../rtk/Reducers/LibraryReducer";
+import { addToLibrary, selectIsInPlayList } from "../../rtk/Reducers/LibraryReducer";
 import { TbCirclePlus } from "react-icons/tb";
-import { MdLibraryAdd } from "react-icons/md";
+import { MdFormatListBulletedAdd, MdLibraryAdd, MdOutlinePlaylistRemove } from "react-icons/md";
+import { createSelector } from "@reduxjs/toolkit";
+import LibraryAvailable from "../libraries/librariesAvailable";
 
 
 const cookies = new Cookies();
 
-function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
+function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
   const lang = useSelector((state)=> state.lang);
   const libraries = useSelector((state)=> state.libraries);
   const { isPlaying, currentSurah, currentTime, duration } = useSelector(
@@ -24,24 +26,23 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
   );
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [showLib, setShowLib] = useState(false);
   const token = cookies.get('auth-token');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const isCurrent =
     currentSurah?.id === surahData?.id &&
     surahData?.reciter?.id === currentSurah?.reciter?.id;
   const showPlayIcon = isHovered || (isCurrent && !isPlaying);
 
-  useEffect(() => {
-    if (isCurrent && duration > 0) {
-      setProgress((currentTime / duration) * 100);
-    }
-  }, [currentTime, duration, isCurrent]);
 
+   // Memoize progress calculation
+   const progress = useMemo(() => 
+    isCurrent && duration > 0 ? (currentTime / duration) * 100 : 0,
+    [isCurrent, currentTime, duration]
+  );
 
+  // play/pause track when clicked
   const handlePlayClick = () => {
     if(!token) {
       setShowSignInModal(true);
@@ -75,6 +76,21 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
  }
 
 
+  const lib = ()=> {
+    const isInPlaylist = useSelector((state) => { selectIsInPlayList(state, lib.id, surahData.id) });
+    return (
+      <ul className=" absolute w-fit px-3 py-2 rounded-lg bottom-5 right-3 bg-search-dark text-white ">
+            {
+              libraries?.libraries.map((lib)=> (
+                <li key={lib.id} onClick={()=> handleAddToLibrary(lib)} className=" not-last:border-b-1 flex items-center justify-between gap-2 not-last:border-b-gray py-2 px-3  hover:bg-gray/20 transition-colors cursor-pointer">{lib?.name} <span>{isInPlaylist ? <MdOutlinePlaylistRemove /> : <MdFormatListBulletedAdd />} </span></li>
+              ))
+            }
+          </ul>
+    )
+  }
+
+
+
   return (
    <>
      <ModualSignIn
@@ -92,21 +108,21 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
           {isCurrent && (
             <svg
               className="absolute top-0 left-0 w-full h-full transform -rotate-90"
-              viewBox="0 0 32 32"
+              viewBox="0 0 35 35"
             >
               <circle
-                cx="16"
-                cy="16"
-                r="14"
+                cx="17"
+                cy="17"
+                r="16"
                 className="stroke-current text-gray-800"
                 fill="none"
                 strokeWidth="2"
               />
               <circle
-                cx="16"
-                cy="16"
-                r="14"
-                className={`stroke-current ${onFavorite ? 'text-pink-600' : 'text-green'}`}
+                cx="17"
+                cy="17"
+                r="16"
+                className={`stroke-current ${isPlaying  ? (onFavorite ? 'text-pink-600' : 'text-green') : 'text-white'}`}
                 fill="none"
                 strokeWidth="2"
                 strokeDasharray={`${progress} 100`}
@@ -121,14 +137,14 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
           >
             {showPlayIcon ? (
               isCurrent && isPlaying ? (
-                <FaPause className={` size-4 ${isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ) : "text-gray"}`} />
+                <FaPause className={` size-4 ${isCurrent ? isPlaying  ? (onFavorite ? 'text-pink-600' : 'text-green') : 'text-white' : "text-gray"}`} />
               ) : (
                 <FaPlay
-                  className={`${isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ) : "text-gray"} size-4`}
+                  className={`${isCurrent ? isPlaying  ? (onFavorite ? 'text-pink-600' : 'text-green') : 'text-white' : "text-gray"} size-4`}
                 />
               )
             ) : isCurrent && isPlaying ? (
-              <FaPause className={` size-4 ${isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ) : "text-gray"}`} />
+              <FaPause className={` size-4 ${isCurrent ? isPlaying  ? (onFavorite ? 'text-pink-600' : 'text-green') : 'text-white': "text-gray"}`} />
             ) : (
               <span className="text-gray font-bold text-lg">{index}</span>
             )}
@@ -138,20 +154,49 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
         <div className="flex items-center ml-1 sm:ml-4 ">
           <div className={`w-[60px] h-[60px] ${lang === 'eng' ? 'mr-4': 'ml-4'} rounded-lg bg-gray-800 overflow-hidden`}>
             {/* Replace with actual image */}
-            <div className="w-full h-full bg-gray-700 animate-pulse" />
+            {
+              onSurah && surahData?.reciter?.imgUrl ? (
+                <img
+                  src={surahData?.reciter?.imgUrl}
+                  alt={surahData?.reciter?.name}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                
+              )
+              : 
+              (
+                <div className="w-full h-full bg-gray-700 animate-pulse" />
+              )
+            }
           </div>
          <div className="txt">
-         <div
+         {
+          onSurah ? 
+          (
+            <div
             className={`text-ellipsis overflow-hidden sm:text-xl ${
               isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ): "text-heading"
             }`}
           >
-            {surahData?.name || "......."}
+            {surahData?.reciter?.name || "......."}
           </div>
+          )
+          :
+          (
+            <Link
+            to={`/surah?q=${surahData?.surahId}`} 
+            className={`text-ellipsis overflow-hidden sm:text-xl ${
+              isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ): "text-heading"
+            }`}
+          >
+            { surahData?.name || "......."}
+          </Link>
+          )
+         }
           {
           
-            onFavorite && (
-              <div className={`reciter-name text-ellipsis overflow-hidden text-xs ${isCurrent ? 'text-pink-600' : 'text-white'} `}> {surahData?.reciter?.name} </div>
+            onFavorite || onSurah && (
+              <div className={`reciter-name text-ellipsis overflow-hidden text-xs ${isCurrent ? (onSurah ? 'text-green' : 'text-pink-600') : 'text-white'} `}> {onSurah ? surahData?.name : surahData?.reciter?.name} </div>
             )
           }
          </div>
@@ -162,13 +207,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite}) {
       {
         showLib && isHovered && 
         (
-          <ul className=" absolute w-fit px-3 py-2 rounded-lg bottom-5 right-3 bg-search-dark text-white ">
-            {
-              libraries?.libraries.map((lib)=> (
-                <li key={lib.id} onClick={()=> handleAddToLibrary(lib)} className=" not-last:border-b-1 flex items-center justify-between gap-2 not-last:border-b-gray py-2 px-3  hover:bg-gray/20 transition-colors cursor-pointer">{lib?.name} <span><MdLibraryAdd /></span></li>
-              ))
-            }
-          </ul>
+          <LibraryAvailable surahData={surahData} onClick={()=> setShowLib(!showLib)} />
         )
       }
       <TbCirclePlus onClick={()=> setShowLib(!showLib)} className={`text-gray   ${isHovered ? 'sm:block' : 'hidden'} cursor-pointer size-5`} />
@@ -203,4 +242,8 @@ const formatTime = (seconds) => {
     .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
-export default SurahListItem;
+export default memo(SurahListItem);
+
+
+
+

@@ -6,19 +6,11 @@ import { GoHomeFill } from "react-icons/go";
 import { IoIosRadio } from "react-icons/io";
 import { PiPlus } from "react-icons/pi";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link, NavLink } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   createLibrary,
   deleteLibrary,
-  renameLibrary,
-  reorderLibraries,
-  setActiveLibrary,
-  selectAllLibraries,
-  selectActiveLibrary,
-  selectIsFavorite,
-  addToLibrary,
-  removeFromLibrary,
 } from "../../rtk/Reducers/LibraryReducer";
 import LibraryList from "../libraries/libraryList";
 import { MdLanguage } from "react-icons/md";
@@ -26,6 +18,7 @@ import LanguageBtn from "../uncommen/LanguageBtn";
 
 const Sidebar = () => {
   const dispatch = useDispatch();
+  const lang = useSelector((state)=> state.lang);
   const [showOnMobile, setShowOnMobile] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -53,7 +46,7 @@ const Sidebar = () => {
           <div className="liblary hidden sm:block">
             <div className="top flex flex-col sm:flex-row justify-between items-center mt-2 mb-4 gap-2">
               <h3 className="text-gray text-nowrap font-bold text-xs sm:text-xl opacity-85">
-                Your Library
+                {lang === 'eng' ? 'Your Libraries' : "مكتباتك"}
               </h3>
               <button
                 onClick={() => setIsCreating(true)}
@@ -121,7 +114,7 @@ const Sidebar = () => {
                   className="text-heading font-medium text-nowrap 
                   hidden sm:block sm:text-sm md:text-[19px]"
                 >
-                  Home
+                  {lang === 'ar' ? 'الرئيسية' : 'Home'}
                 </span>
               </NavLink>
 
@@ -136,7 +129,7 @@ const Sidebar = () => {
               >
                 <GiSoundOn className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] hidden  sm:block sm:text-sm  text-nowrap  ">
-                  Reciters
+                  {lang === 'ar' ? "القراء" : 'Reciters'}
                 </span>
               </NavLink>
               <NavLink
@@ -150,7 +143,7 @@ const Sidebar = () => {
               >
                 <FaReadme className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] hidden  sm:block sm:text-sm  text-nowrap  ">
-                  surah
+                  {lang === 'ar' ? "السور" : "The Surah's"}
                 </span>
               </NavLink>
               <NavLink
@@ -164,7 +157,7 @@ const Sidebar = () => {
               >
                 <IoIosRadio className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] hidden  sm:block sm:text-sm  text-nowrap  ">
-                  Live
+                  {lang === 'ar' ? "مباشر" : "Live"}
                 </span>
               </NavLink>
             </ul>

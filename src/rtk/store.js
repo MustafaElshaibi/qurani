@@ -6,6 +6,7 @@ import authReducer from './Reducers/AuthReducer'
 import librariesSlice from './Reducers/LibraryReducer';
 import langSlice from './Reducers/langSlice';
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { throttle } from 'lodash-es';
 
 export const store = configureStore({
   reducer: {
@@ -15,13 +16,25 @@ export const store = configureStore({
     libraries: librariesSlice,
     lang: langSlice,
   }, 
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(quranApi.middleware)
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['player/playTrack'],
+        ignoredPaths: ['player.currentSurah.reciter', 'player.queue'],
+        warnAfter: 50,
+      },
+      immutableCheck: {
+        warnAfter: 50,
+      },
+    }).concat(quranApi.middleware),
 })
 
-// Subscribe to store updates
-store.subscribe(() => {
+// Throttled localStorage persistence
+const persistStore = throttle(() => {
   const positions = store.getState().player.playbackPositions;
   localStorage.setItem('playbackPositions', JSON.stringify(positions));
-});
+}, 5000);
+
+store.subscribe(persistStore);
 
 setupListeners(store.dispatch);

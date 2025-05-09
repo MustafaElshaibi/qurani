@@ -1,4 +1,3 @@
-// MainDisplay.tsx
 import {  useEffect,  useState } from "react";
 import { useGetAllRecitersQuery, useGetAllSurahDetailsQuery } from "../rtk/Services/QuranApi";
 import { RoundedCard } from "../components/uncommen/RoundedCard";
@@ -6,116 +5,30 @@ import  SquarCard  from "../components/uncommen/SquarCard";
 import { FiChevronRight } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { setLanguage } from "../rtk/Reducers/langSlice";
-import { ErrorPage } from "./Error";
-
-const createRequestManager = () => {
-  const cache = new Map();
-  const queue = [];
-  let isProcessing = false;
-  const API_KEY = "AIzaSyC9ny6NRYl4dWQLNCzJy8atwkPjXfG99L0";
-  const CX = "2495ccf136d074c04";
-  const RATE_LIMIT = 1500; // Slightly longer delay for better rate limiting
-
-  const processQueue = async () => {
-    if (isProcessing || queue.length === 0) return;
-    isProcessing = true;
-
-    const { reciterName, resolve, reject } = queue.shift();
-
-    try {
-      if (cache.has(reciterName)) {
-        resolve(cache.get(reciterName));
-        return;
-      }
-
-      const url = new URL("https://www.googleapis.com/customsearch/v1");
-      url.searchParams.append("q", `${reciterName} photo`);
-      url.searchParams.append("cx", CX);
-      url.searchParams.append("key", API_KEY);
-      url.searchParams.append("searchType", "image");
-      url.searchParams.append("imgSize", "xxlarge"); // Higher quality images
-      url.searchParams.append("imgType", "face"); // Focus on face images
-      // url.searchParams.append('rights', 'cc_publicdomain,cc_noncommercial'); // Usage rights
-      url.searchParams.append("num", 5); // Get 3 results to find best match
-      url.searchParams.append("safe", "active"); // Safe search
-      url.searchParams.append("fileType", "jpg|png");
-
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("API request failed");
-
-      const data = await response.json();
-      // Find first square-shaped face image
-      const validImage = data.items?.find((item) => {
-        const img = item.image;
-        return (
-          item.link &&
-          img?.width >= 400 &&
-          img?.height >= 400 &&
-          Math.abs(img.width - img.height) <= 100 && // Allow slight rectangle
-          item.link.match(/\.(jpe?g|png)$/i) && // Valid image formats
-          !item.link.includes("logo") // Filter out logos
-        );
-      });
-
-      const imageUrl = validImage?.link || null;
-      cache.set(reciterName, imageUrl);
-      resolve(imageUrl);
-    } catch (error) {
-      console.error("Image search error:", error);
-      reject(error);
-      cache.set(reciterName, null);
-    } finally {
-      setTimeout(() => {
-        isProcessing = false;
-        processQueue();
-      }, RATE_LIMIT);
-    }
-  };
-
-  return {
-    getImage: (reciterName) =>
-      new Promise((resolve, reject) => {
-        // Clean up reciter name for better search
-        const cleanedName = reciterName
-          .replace(/sheikh|imam|dr\.?/gi, "")
-          .trim();
-
-        // Check cache first
-        if (cache.has(cleanedName)) {
-          resolve(cache.get(cleanedName));
-          return;
-        }
-
-        queue.push({ reciterName: cleanedName, resolve, reject });
-        processQueue();
-      }),
-    cache,
-  };
-};
+import PageLoader from "../components/uncommen/PageLoader";
+import { requestManager } from "../utility/requestManager";
 
 
-
-
-
-
-const requestManager = createRequestManager();
 
 
 const Home = () => {
   const lang = useSelector((state) => state.lang);
-  const { data, loading, error, isFetching  } = useGetAllRecitersQuery(lang);
+  const { data, loading, error, isFetching , refetch } = useGetAllRecitersQuery(lang);
   const {data: suwarData, isFetching: fetchSuwar, isLoading: isLoadSuwar } = useGetAllSurahDetailsQuery(lang);
   const loader = loading || !data;
   const [reciters, setReciters] = useState([]);
   const dispatch = useDispatch();
     const [suwar, setSuwar] = useState([]);
   
+    
     useEffect(()=> {
       if(suwarData?.suwar)
       {
         setSuwar(suwarData?.suwar);
       }
     }, [suwarData])
+
+
 
   // Handle cross-tab synchronization
   useEffect(() => {
@@ -129,31 +42,30 @@ const Home = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [dispatch]);
 
-
+  // set initial reciters when data is available
   useEffect(() => {
     if (data?.reciters) {
       const initialReciters = data.reciters.slice(0, 6);
       setReciters(initialReciters);
-
-      // Pre-warm cache with initial requests
-      initialReciters.forEach((reciter) => {
-        const getImageWithRetry = async (name, retries = 0) => {
-          try {
-            return await requestManager.getImage(name);
-          } catch (error) {
-            if (retries > 0) {
-              await new Promise((resolve) => setTimeout(resolve, 3000));
-              return getImageWithRetry(name, retries - 1);
-            }
-            return null;
-          }
-        };
-        getImageWithRetry(reciter?.name);
-      });
     }
   }, [data]);
 
-  if(error) <ErrorPage />
+  // Handle Retry logic
+  if(error) return (
+        <div className="w-full bg-[#121212] flex items-center justify-center rounded-lg p-6 space-y-8 min-h-screen">
+         <div className="cont">
+         <button 
+            onClick={()=> refetch()} 
+            className="px-7 py-3 rounded-full mx-auto  bg-white text-black cursor-pointer block w-fit font-bold"
+          >
+            Retry
+          </button>
+          {error  && <p className="text-white mt-2 ">Trying to reconnect...</p>}
+          {isFetching && <PageLoader />}
+         </div>
+        </div>
+      );
+
 
   return (
     <div className="w-full bg-[#121212] rounded-lg p-6 space-y-8 min-h-screen">
@@ -204,13 +116,13 @@ const Home = () => {
           <section className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-white hover:underline cursor-pointer">
-                Popular Reciters
+                {lang === "eng" ? "Popular Reciters" : "أشهر القراء"}
               </h2>
               <button className="text-gray-300 hover:text-white cursor-pointer text-sm font-bold flex items-center gap-1">
                 See all <FiChevronRight className="text-lg " />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6   gap-6">
               {reciters.map((reciter, i) => (
                 <RoundedCard
                   key={reciter?.id || i}
@@ -225,7 +137,7 @@ const Home = () => {
           <section className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-white hover:underline cursor-pointer">
-                Popular Chapters
+                {lang === "eng" ? "Popular Chapters" : "السور الشائعة"}
               </h2>
               <button className="text-gray-300 cursor-pointer hover:text-white text-sm font-bold flex items-center gap-1">
                 See all <FiChevronRight className="text-lg" />

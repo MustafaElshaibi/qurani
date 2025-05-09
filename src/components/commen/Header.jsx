@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaQuran } from "react-icons/fa";
 import { GoHomeFill } from "react-icons/go";
-import { CiSearch } from "react-icons/ci";
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import { BiDownload, BiMenu, BiSupport, BiLogOut } from "react-icons/bi";
 import { useSelector, useDispatch } from "react-redux";
@@ -10,13 +9,13 @@ import  SearchInput  from "./SearchInput";
 import Cookies from "universal-cookie";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { BiUser, BiCog } from "react-icons/bi";
-import { FaCircleUser } from "react-icons/fa6";
 import { RiSearchLine } from "react-icons/ri";
-import { useGetAllRecitersQuery } from "../../rtk/Services/QuranApi";
+import logo from "../../assets/images/quranLogo.svg";
 const cookies = new Cookies();
 
 export default function Header() {
   const { user } = useSelector((state) => state.auth);
+  const lang = useSelector((state)=> state.lang);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
@@ -40,7 +39,7 @@ export default function Header() {
     }else if(!query && isInputFocused) {
       navigate(`/`);
     }
-  }, [searchValue, navigate]);
+  }, [searchValue, navigate, isInputFocused]);
 
 
 
@@ -57,14 +56,16 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-main-black shadow-lg w-full">
-      <nav className="mx-auto px-4 py-1 flex items-center max-sm:justify-between h-20 sm:gap-8 gap-4 w-full">
+    <header className="header sticky top-0 z-30 bg-main-black shadow-lg w-full">
+      <nav className="mx-auto px-5 py-1 flex items-center max-sm:justify-between h-20 sm:gap-6 gap-4 w-full">
         {/* Logo Section */}
         <Link
           to="/"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-heading p-1 hover:bg-heading/90 transition-colors"
+          className="flex items-center justify-center size-10  rounded-full bg-main-black p-1 hover:bg-main-black/90 transition-colors focus:outline-none ring-2 ring-white"
         >
-          <FaQuran className="text-main-black size-5" />
+          {/* <FaQuran className="text-main-black size-5" /> */}
+          <img src={logo} alt="Logo" className="size-10" />
+
         </Link>
 
         {/* Desktop Navigation */}
@@ -94,7 +95,7 @@ export default function Header() {
         <RiSearchLine onClick={toggleSearch} className="text-white size-5 sm:hidden" />
           {token ? (
             <div className="flex items-center gap-4">
-              <ProfileButton user={user} onLogout={handleLogout} />
+              <ProfileButton user={user} onLogout={handleLogout} lang={lang} />
             </div>
           ) : (
             <div className=" items-center hidden sm:flex gap-2">
@@ -102,13 +103,13 @@ export default function Header() {
                 to="/register"
                 className="text-white py-2 px-5 font-bold rounded-full cursor-pointer hover:bg-white/10 transition-colors"
               >
-                Register
+                {lang === 'eng' ? 'Register' : 'أنشاء حساب'}
               </Link>
               <Link
                 to="/login"
                 className="text-black py-2 px-5 font-bold rounded-full cursor-pointer bg-white hover:bg-white/90 transition-colors"
               >
-                Login
+                {lang === 'eng' ? 'Login' : 'تسجيل الدخول'}
               </Link>
             </div>
           )}
@@ -201,7 +202,7 @@ const AuthLink = ({ to, label }) => (
   </Link>
 );
 
-const ProfileButton = ({ user, mobile, onLogout }) => {
+const ProfileButton = ({ user, mobile, onLogout, lang }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -232,12 +233,17 @@ const ProfileButton = ({ user, mobile, onLogout }) => {
             className="size-8 rounded-full object-cover"
           />
         ) : (
-          <FaCircleUser className="size-8 text-gray" />
+          // <FaCircleUser className="size-8 text-gray" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">
+                    { user?.email?.[0].toUpperCase() || 'U'}
+                  </span>
+                </div>
         )}
       </button>
 
       {showMenu && (
-        <div className="absolute right-0 top-12 bg-search-dark border border-gray-700 rounded-lg shadow-xl min-w-[200px] z-50">
+        <div className={`absolute ${lang === 'eng' ? 'right-0' : 'left-0'} top-12 bg-search-dark border border-gray-700 rounded-lg shadow-xl min-w-[200px] z-50`}>
           <div className="p-2">
             <Link
               to="/profile"

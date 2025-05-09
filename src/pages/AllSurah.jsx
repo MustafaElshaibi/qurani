@@ -23,17 +23,6 @@ const AllSurah = () => {
       }
     }, [suwarData])
 
-  // Handle cross-tab synchronization
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'lang') {
-        dispatch(setLanguage(e.newValue || 'eng'));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [dispatch]);
 
 
   if(error) <ErrorPage />
@@ -70,7 +59,7 @@ const AllSurah = () => {
           <section className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-white hover:underline cursor-pointer">
-                Popular Chapters
+                {lang === "eng" ? "Chapters" : "جميع السور"}
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">

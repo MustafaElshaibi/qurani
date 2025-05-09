@@ -13,11 +13,16 @@ class AudioService {
     this.retryCount = 0;
     this.MAX_RETRIES = 2;
     this.playPromise = null;
+    this.lastUpdate = 0;
+    this.updateInterval = 1000; // Update every second instead of real-time
     
     this.audio.ontimeupdate = () => {
-      this.store.dispatch(setCurrentTime(this.audio.currentTime));
+      const now = Date.now();
+      if (now - this.lastUpdate > this.updateInterval) {
+        this.store.dispatch(setCurrentTime(this.audio.currentTime));
+        this.lastUpdate = now;
+      }
     };
-    
     this.audio.onloadedmetadata = () => {
       this.store.dispatch(setDuration(this.audio.duration));
       this.preloadNextTrack();

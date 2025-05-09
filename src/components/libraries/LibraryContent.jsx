@@ -9,7 +9,6 @@ const LibraryContent = () => {
 
   const dispatch = useDispatch();
 
-  console.log(items)
 
   return (
     <>

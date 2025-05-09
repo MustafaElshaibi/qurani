@@ -139,6 +139,9 @@ const authReducer = createSlice({
             photoURL: action.payload.photoURL,
             providerData: action.payload.providerData,
             accessToken: action.payload.accessToken,
+            creationTime: action.payload.metadata.creationTime,
+            lastSignInTime: action.payload.metadata.lastSignInTime,
+            createdAt: action.payload.metadata.createdAt,
           }
         : null;
     },

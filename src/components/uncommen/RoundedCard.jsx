@@ -1,14 +1,18 @@
 // RoundedCard.tsx
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import avatar from '../../assets/images/avtr.png';
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 
 
-export const RoundedCard = ({reciter, loading,  requestManager }) => {
+export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [img, setImg] = useState(avatar);
   const [isLoading, setIsLoading] = useState(true);
+      const dispatch = useDispatch();
+
+
 
   useEffect(() => {
     let isMounted = true;
@@ -18,7 +22,7 @@ export const RoundedCard = ({reciter, loading,  requestManager }) => {
       if (!reciter?.name) return;
       
       try {
-        const imageUrl = await requestManager.getImage(reciter.name);
+        const imageUrl = await requestManager.getImage(reciter.id, reciter.name);
         if (isMounted && imageUrl) {
           setImg(imageUrl);
         }
@@ -35,11 +39,13 @@ export const RoundedCard = ({reciter, loading,  requestManager }) => {
       isMounted = false;
       controller.abort();
     };
-  }, [reciter, requestManager]);
+  }, [reciter, requestManager, dispatch]);
+
+  
 
   return (
     <Link
-    to={`/reciter/${reciter?.id}`} 
+    to={`/reciter?q=${reciter?.id}`} 
       className={`group p-4  rounded-lg hover:bg-hover-black  transition-all duration-200 cursor-pointer ${loading && 'pointer-events-none'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -70,6 +76,7 @@ export const RoundedCard = ({reciter, loading,  requestManager }) => {
             )}
             <img
               src={img}
+              loading="lazy"
               alt={reciter?.name}
               className={`absolute inset-0 w-full h-full object-cover ${
                 isHovered ? "scale-105" : "scale-100"
@@ -98,6 +105,6 @@ export const RoundedCard = ({reciter, loading,  requestManager }) => {
       }
     </Link>
   );
-};
+});
 
 

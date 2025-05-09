@@ -55,3 +55,7 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+.header .logo-svg path {
+  fill: white;
+  transition: all 0.3s ease-in-out;
+}

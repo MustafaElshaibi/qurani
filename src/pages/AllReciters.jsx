@@ -1,15 +1,130 @@
 
-import { useCallback, useEffect,  useState } from "react";
+import {  useEffect,  useState } from "react";
 import { useGetAllRecitersQuery } from "../rtk/Services/QuranApi";
 import { RoundedCard } from "../components/uncommen/RoundedCard";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { setLanguage } from "../rtk/Reducers/langSlice";
 import PageLoader from "../components/uncommen/PageLoader";
+import { requestManager } from "../utility/requestManager";
+
+
+
+// const createRequestManager = () => {
+//   // Initialize cache from localStorage
+//   let cache = new Map();
+//   const cachedData = localStorage.getItem('reciterImageCache');
+//   if (cachedData) {
+//     try {
+//       cache = new Map(JSON.parse(cachedData));
+//     } catch (e) {
+//       console.error('Error loading cache from localStorage:', e);
+//     }
+//   }
+//   const queue = [];
+//   let isProcessing = false;
+//   const API_KEY = import.meta.env.VITE_NEXT_GOOGLE_SEARCH_API_KEY;
+//   const CX = "2495ccf136d074c04";
+//   const RATE_LIMIT = 1500; // Slightly longer delay for better rate limiting
+
+//    // Helper to persist cache
+//    const persistCache = () => {
+//     try {
+//       const serialized = JSON.stringify(Array.from(cache.entries()));
+//       localStorage.setItem('reciterImageCache', serialized);
+//     } catch (e) {
+//       console.error('Error persisting cache:', e);
+//     }
+//   };
+
+//   const processQueue = async () => {
+//     if (isProcessing || queue.length === 0) return;
+//     isProcessing = true;
+
+//     const { reciterName, reciterId, resolve, reject } = queue.shift();
+
+//     try {
+//       if (cache.has(reciterId)) {
+//         resolve(cache.get(reciterId));
+//         return;
+//       }
+
+//       const url = new URL("https://www.googleapis.com/customsearch/v1");
+//       url.searchParams.append("q", `${reciterName}`);
+//       url.searchParams.append("cx", CX);
+//       url.searchParams.append("key", API_KEY);
+//       url.searchParams.append("searchType", "image");
+//       // url.searchParams.append("imgSize", "xxlarge"); // Higher quality images
+//       url.searchParams.append("imgType", "face"); // Focus on face images
+//       url.searchParams.append("num", 10); // Get 3 results to find best match
+//       url.searchParams.append("safe", "active"); // Safe search
+//       url.searchParams.append("fileType", "jpg|png");
+
+//       const response = await fetch(url);
+//       if (!response.ok) throw new Error("API request failed");
+
+//       const data = await response.json();
+//       console.log(data)
+//       // Find first square-shaped face image
+//       const validImage = data.items?.find((item) => {
+//         const img = item.image;
+//         return (
+//           item.link &&
+//           img?.width >= 400 &&
+//           img?.height >= 400 &&
+//           Math.abs(img.width - img.height) <= 100 && // Allow slight rectangle
+//           item.link.match(/\.(jpe?g|png)$/i) 
+//         );
+//       });
+
+//       const imageUrl = validImage?.link || null;
+//       cache.set(reciterId, imageUrl);
+//       persistCache();
+//       resolve(imageUrl);
+//     } catch (error) {
+//       console.error("Image search error:", error);
+//       reject(error);
+//       cache.set(reciterId, null);
+//       persistCache();
+//     } finally {
+//       setTimeout(() => {
+//         isProcessing = false;
+//         processQueue();
+//       }, RATE_LIMIT);
+//     }
+//   };
+
+//   return {
+//     getImage: (reciterId, reciterName) =>
+//       new Promise((resolve, reject) => {
+//         // Clean up reciter name for better search
+//         const cleanedName = reciterName
+//           .replace(/sheikh|imam|dr\.?/gi, "")
+//           .trim();
+
+//         // Check cache first
+//         if (cache.has(reciterId)) {
+//           resolve(cache.get(reciterId));
+//           return;
+//         }
+
+//         queue.push({ reciterId: reciterId, reciterName: cleanedName, resolve, reject });
+//         processQueue();
+//       }),
+//     cache,
+//     clearCache: () => {
+//       cache.clear();
+//       localStorage.removeItem('reciterImageCache');
+//     }
+//   };
+// };
 
 
 
 
+
+
+// const requestManager = createRequestManager();
 
 
 
@@ -18,7 +133,6 @@ const AllReciters = () => {
   const { data, loading, error, refetch, isFetching } = useGetAllRecitersQuery(lang);
   const loader = loading || !data;
   const [reciters, setReciters] = useState([]);
-  const [retryCount, setRetryCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(20);
   const indexOfLastPost = currentPage * postsPerPage;
@@ -47,7 +161,7 @@ const AllReciters = () => {
                 key={reciter?.id || i} 
                 reciter={reciter} 
                 loading={loader}
-                
+                requestManager={requestManager}
               />
             ))}
           </div>
@@ -55,46 +169,18 @@ const AllReciters = () => {
   }
 
 
-  const fetchAllReciters = useCallback(async () => {
+
+
+  useEffect(() => {
     try {
-      const result = await refetch();
-      if (result.data) {
-        const initialReciters = result.data.reciters;
+      if (data?.reciters) {
+        const initialReciters = data?.reciters;
         setReciters(initialReciters);
-        // Reset retry count on successful fetch
-        setRetryCount(0);
-        // Pre-warm cache with initial requests
-      initialReciters.forEach(reciter => {
-        const getImageWithRetry = async (name, retries = 0) => {
-          try {
-            return await requestManager.getImage(name);
-          } catch (error) {
-            if (retries > 0) {
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              return getImageWithRetry(name, retries - 1);
-            }
-            return null;
-          }
-        };
-        getImageWithRetry(reciter?.name);
-      });
       }
     } catch (error) {
       console.error('Fetch error:', error);
-      if (retryCount < 2) {
-        const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
-        setTimeout(() => {
-          setRetryCount(c => c + 1);
-          fetchAllReciters();
-        }, delay);
-      }
     }
-
-  }, [refetch, retryCount]);
-
-  useEffect(() => {
-    fetchAllReciters();
-  }, [data, fetchAllReciters]);
+  }, [data]);
 
 
 
@@ -104,7 +190,7 @@ const AllReciters = () => {
       <div className="w-full bg-[#121212] flex items-center justify-center rounded-lg p-6 space-y-8 min-h-screen">
        <div className="cont">
        <button 
-          onClick={fetchAllReciters} 
+          onClick={()=> refetch()} 
           className="px-7 py-3 rounded-full mx-auto  bg-white text-black cursor-pointer block w-fit font-bold"
         >
           Retry
@@ -166,7 +252,7 @@ const AllReciters = () => {
                 <section className="space-y-6 p-3 sm:p-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-white hover:underline cursor-pointer">
-            All Reciters
+            {lang === 'eng' ? 'All Reciters' : 'كل القراء'}
           </h2>
         </div>
         {

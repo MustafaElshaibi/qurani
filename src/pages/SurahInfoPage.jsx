@@ -2,16 +2,19 @@
 import SurahListItem from "../components/uncommen/SurahListItem";
 import { useSearchParams } from "react-router-dom";
 import {
+  useGetAllRecitersQuery,
   useGetAllSurahDetailsQuery,
-  useGetSurahRecitersQuery,
   useGetSvgSurahQuery,
 } from "../rtk/Services/QuranApi";
-import { useEffect, useState } from "react";
+import {  useEffect,  useMemo,  useState } from "react";
 import { ErrorPage } from "./Error";
 import {  useSelector } from "react-redux";
 import { CiMusicNote1 } from "react-icons/ci";
 import QuranReader from "../components/uncommen/QuranReader";
-
+import avatar from '../assets/images/avtr.png';
+import PlayButton from "../components/commen/PlayButton";
+import { IoIosMore } from "react-icons/io";
+import { requestManager } from "../utility/requestManager";
 
 
 
@@ -22,13 +25,11 @@ function SurahInfoPage() {
   const [surahParms] = useSearchParams();
   const query = surahParms.get('q').split('_') || '';
   const id = query?.[0];
-  const name = query?.[1];
   const [isSticky, setIsSticky] = useState(false);
   const lang = useSelector((state)=> state.lang);
-  const { data, isLoading, error } = useGetSurahRecitersQuery({id, lang});
+  const { data: recitersData, error, refetch, isLoading, isFetching } = useGetAllRecitersQuery(lang);
   const {data: quranTxt} = useGetSvgSurahQuery(id);
     const { data: suwarData } = useGetAllSurahDetailsQuery(lang);
-  const [surahObj, setSurahObj] = useState([]);
   const [reciterObj, setReciterObj] = useState([]);
 
 
@@ -49,53 +50,108 @@ function SurahInfoPage() {
 
 
 
-  // make reciter object
-  useEffect(() => {
-    const generateSurahData = async () => {
 
-      const surah = suwarData?.suwar.filter((surah)=> surah.id == id );
+// make surah and reciter obj
+useEffect(() => {
+  let isMounted = true;
+  const abortController = new AbortController();
 
-      setSurahObj(surah?.[0]);
+  const fetchReciterSurahData = async () => {
+    if (!recitersData?.reciters?.length || !suwarData?.suwar?.length || !id) return;
 
-      const surahPromises = data?.reciters.map((reciter)=> {
+    const currentSurah = suwarData.suwar.find((surah) => surah.id == id);
+    if (!currentSurah) return;
+
+    // Initial data with placeholder images
+    const initialData = recitersData.reciters
+      .filter(reciter => {
         const moshaf = reciter?.moshaf?.[0];
-        const num = moshaf?.surah_list.split(',').find((i)=> i == id);
-          const formatted = id.padStart(3, '0');
-          const url = `${moshaf.server}${formatted}`;
-          try {
-                return {
-                  id: `${reciter?.name}-${surah?.[0]?.name}-${num}`,
-                  url: `${url}.mp3`,
-                  number: parseInt(num, 10),
-                  name: surah?.[0]?.name || "Unknown Surah",
-                  makkia:  surah?.[0]?.makkia || 0,
-                  reciter: {
-                    id: `${reciter?.name}-${reciter?.id}`,
-                    name: reciter?.name,
-                    moshaf: moshaf?.name,
-                  },
-                };
-              } catch (error) {
-                console.error("Error loading audio duration:", error);
-                return null;
-              }
-        
-      }
-      );
-      const surahData = (await Promise.all(surahPromises)).filter(Boolean);
-      setReciterObj(surahData);
-    };
+        return moshaf?.surah_list?.split(',').map(s => s.trim()).includes(id.toString());
+      })
+      .map(reciter => {
+        const moshaf = reciter.moshaf[0];
+        const formattedId = id.toString().padStart(3, '0');
+        const baseUrl = moshaf.server.endsWith('/') ? moshaf.server : `${moshaf.server}/`;
 
-    generateSurahData();
-  }, [id, data, suwarData]);
+        return {
+          id: `${reciter.id}-${currentSurah.id}`,
+          surahId: currentSurah.id.toString(),
+          url: `${baseUrl}${formattedId}.mp3`,
+          number: currentSurah.id,
+          name: currentSurah.name,
+          makkia: currentSurah.makkia,
+          reciter: {
+            id: reciter.id,
+            name: reciter.name,
+            moshaf: moshaf.name,
+            imgUrl: avatar, // Placeholder image
+          },
+        };
+      });
+
+    if (isMounted) {
+      setReciterObj(initialData);
+      
+      // Fetch images after initial render
+      initialData.forEach(async (item) => {
+        try {
+          const imageUrl = await requestManager.getImage(
+            item.reciter.id,
+            item.reciter.name,
+            { signal: abortController.signal }
+          );
+
+          if (isMounted && imageUrl) {
+            setReciterObj(prev => prev.map(prevItem => 
+              prevItem.id === item.id
+                ? { 
+                    ...prevItem, 
+                    reciter: { 
+                      ...prevItem.reciter, 
+                      imgUrl: imageUrl 
+                    } 
+                  }
+                : prevItem
+            ));
+          }
+        } catch (error) {
+          if (!abortController.signal.aborted) {
+            console.warn("Image fetch failed for:", item.reciter.name);
+          }
+        }
+      });
+    }
+  };
+
+  fetchReciterSurahData();
+
+  return () => {
+    isMounted = false;
+    abortController.abort();
+  };
+}, [recitersData, id, suwarData]);
 
 
-
-  if(error) return <ErrorPage />;
+if (error) {
+  return (
+    <div className="w-full bg-[#121212] flex items-center justify-center rounded-lg p-6 space-y-8 min-h-screen">
+     <div className="cont">
+     <button 
+        onClick={()=> refetch()} 
+        className="px-7 py-3 rounded-full mx-auto  bg-white text-black cursor-pointer block w-fit font-bold"
+      >
+        Retry
+      </button>
+      {error  && <p className="text-white mt-2 ">Trying to reconnect...</p>}
+      {isFetching && <PageLoader />}
+     </div>
+    </div>
+  );
+}
 
   return (
     <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
-      {isLoading ? (
+      {isLoading || isFetching || !reciterObj ? (
         /* Skeleton Loading State */
         <>
           <div className="top relative min-h-[300px] px-5 py-7 animate-pulse">
@@ -151,16 +207,25 @@ function SurahInfoPage() {
               Let's Dive In Peace
             </span>
             <div className="reciter-name capitalize text-9xl font-extrabold max-sm:text-5xl text-white mt-5 mb-7 text-wrap overflow-hidden text-ellipsis max-w-[900px] lg:w-fit lg:overflow-visible ">
-              {surahObj?.name}
+              {reciterObj?.[0]?.name}
             </div>
             <div className="text-white capitalize text-lg max-sm:text-sm flex items-center gap-1.5 ">
-              <span className="text-2xl  text-green font-bold">{reciterObj.length}</span> Surah Reciters
+              <span className="text-2xl  text-green font-bold">{reciterObj.length}</span> {lang === 'eng' ? 'Reciters' : 'قراء'}
             </div>
           </div>
           <div className="down   bg-gradient-to-b from-blue-500/30 from-1% to-5%  to-second-black ">
+           <div className={`actions flex items-center gap-6 px-5 py-4 ${isSticky && 'sticky top-[100px] z-20 backdrop-blur-sm '}`} >
+                        <PlayButton onClick={onclick} surahQueue={reciterObj} w={"70px"} h={"70px"} p={"27px"} />
+                        <button className="cursor-pointer ">
+                          <IoIosMore className="text-white size-7 font-bold " />
+                        </button>
+                      </div>
+                      <div className="mt-5">
+          {quranTxt && <QuranReader data={quranTxt} />}
+          </div>
             <div className="list mt-4 px-5 py-4">
               <h3 className="text-3xl font-bold text-heading capitalize mb-6">
-                the surah's
+                {lang === 'eng' ? 'Surah Reciters' : ' قراء السورة'}
               </h3>
               <div className="surah-list flex flex-col gap-3  ">
                 {reciterObj.map((surah, i) => (
@@ -169,14 +234,12 @@ function SurahInfoPage() {
                                       index={i + 1}
                                       surahData={surah}
                                       audioQueue={reciterObj}
-                                      onFavorite={true}
+                                      onSurah={true}
                                     />
                 ))}
               </div>
             </div>
-          <div className="mt-5">
-          {quranTxt && <QuranReader data={quranTxt} />}
-          </div>
+          
           </div>
         </>
       )}

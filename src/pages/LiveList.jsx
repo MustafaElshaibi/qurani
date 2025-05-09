@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ReactYouTube from 'react-youtube';
+import { useSelector } from 'react-redux';
 
 const YouTubeLive = () => {
+  const lang = useSelector((state)=> state.lang);
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -86,7 +88,7 @@ const YouTubeLive = () => {
   return (
     <div className="container mx-auto px-4 py-8 bg-second-black rounded-lg min-h-screen">
       <h1 className="text-3xl font-bold text-white mb-8 pt-5 text-center">
-        Live Makkah & Madinah Streams
+       {lang === 'eng' ? ' Live Makkah & Madinah Streams' : "مباشر مكة والمدينة"}
       </h1>
 
       <div className="flex flex-col lg:flex-row gap-8">
