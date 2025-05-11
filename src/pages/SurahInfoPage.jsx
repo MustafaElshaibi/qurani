@@ -214,12 +214,6 @@ if (error) {
             </div>
           </div>
           <div className="down   bg-gradient-to-b from-blue-500/30 from-1% to-5%  to-second-black ">
-           <div className={`actions flex items-center gap-6 px-5 py-4 ${isSticky && 'sticky top-[100px] z-20 backdrop-blur-sm '}`} >
-                        <PlayButton onClick={onclick} surahQueue={reciterObj} w={"70px"} h={"70px"} p={"27px"} />
-                        <button className="cursor-pointer ">
-                          <IoIosMore className="text-white size-7 font-bold " />
-                        </button>
-                      </div>
                       <div className="mt-5">
           {quranTxt && <QuranReader data={quranTxt} />}
           </div>

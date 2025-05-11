@@ -12,6 +12,7 @@ import avatar from "../assets/images/avtr.png";
 import {  useSelector } from "react-redux";
 import ViewsCount from "../components/commen/ViewsCount";
 import {requestManager} from "../utility/requestManager";
+import PageLoader from "../components/uncommen/PageLoader";
 
 
 
@@ -31,8 +32,12 @@ function ListSurahOfReciter() {
   const moshaf = reciter?.moshaf?.[0];
   const [reciterImg, setReciterImg] = useState(null);
   const [isImgLoading, setIsImgLoading] = useState(true);
-
-
+console.log(reciter)
+  useEffect(()=> {
+    if (reciter?.name) {
+      document.title = `${reciter?.name} - Quran App`;
+    }
+  }, [reciter?.name]);
 
 
   // handel grandinat on scroll
@@ -215,7 +220,7 @@ function ListSurahOfReciter() {
             </div>
             <div className="list mt-4 px-5 py-4">
               <h3 className="text-3xl font-bold text-heading capitalize mb-6">
-                {lang === 'eng' ? "the surah's" : "السور"}
+                {lang === 'eng' ? "Chapters" : "السور"}
               </h3>
               <div className="surah-list flex flex-col gap-3  ">
                 {surahUrls.map((surah, i) => (

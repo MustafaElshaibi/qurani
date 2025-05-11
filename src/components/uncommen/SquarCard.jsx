@@ -47,7 +47,7 @@ import { Link } from "react-router-dom";
 
       <div className="min-h-[62px]">
         <h3 className="text-white font-bold font-qurani truncate mb-1">{surah?.name || '.......'}</h3>
-        <p className="text-sm overflow-hidden text-[#b3b3b3] text-ellipsis text-nowrap"> {surah?.makkia ? (lang === 'ar' ? 'سورة مكية' : 'Surah Makkia'): (lang === 'ar' ? 'سورة مدنية' : 'Surah Madaniah')} </p>
+        <p className="text-sm overflow-hidden text-[#b3b3b3] text-ellipsis text-nowrap"> {surah?.makkia ? (lang === 'ar' ? 'سورة مكية' : 'a Makkah chapter'): (lang === 'ar' ? 'سورة مدنية' : 'a Medinite chapter')} </p>
       </div>
     </>
   )}

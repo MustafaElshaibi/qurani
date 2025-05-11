@@ -6,7 +6,6 @@ import authReducer from './Reducers/AuthReducer'
 import librariesSlice from './Reducers/LibraryReducer';
 import langSlice from './Reducers/langSlice';
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { throttle } from 'lodash-es';
 
 export const store = configureStore({
   reducer: {
@@ -30,11 +29,10 @@ export const store = configureStore({
 })
 
 // Throttled localStorage persistence
-const persistStore = throttle(() => {
+const persistStore = () => {
   const positions = store.getState().player.playbackPositions;
   localStorage.setItem('playbackPositions', JSON.stringify(positions));
-}, 5000);
+};
 
 store.subscribe(persistStore);
-
 setupListeners(store.dispatch);

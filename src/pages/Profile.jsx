@@ -2,11 +2,18 @@
 import { useDispatch, useSelector } from "react-redux";
 import PageLoader from "../components/uncommen/PageLoader";
 import { logOut } from "../rtk/Reducers/AuthReducer";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const user = useSelector((state) => state.auth.user); // Assuming you have auth state
   const lang = useSelector((state) => state.lang);
   const dispatch = useDispatch();
+  const naviagte = useNavigate();
+
+  function handleLogOut() {
+    dispatch(logOut());
+    naviagte("/login", { replace: true });
+  }
 
   if (!user) return <div className="min-h-screen flex items-center justify-center"><PageLoader /></div>;
 
@@ -150,7 +157,7 @@ const ProfilePage = () => {
 
         {/* Logout Button */}
         <div className="mt-8 flex justify-end">
-          <button onClick={()=> dispatch(logOut())} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full text-sm font-medium transition-colors">
+          <button onClick={handleLogOut} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full text-sm font-medium transition-colors">
             {lang === 'ar' ? 'تسجيل الخروج' : 'Log Out'}
           </button>
         </div>

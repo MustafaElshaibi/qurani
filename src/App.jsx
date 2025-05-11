@@ -3,13 +3,13 @@ import { useDispatch } from "react-redux";
 import { listenToAuthChanges } from "./rtk/Reducers/AuthReducer";
 import { Outlet, Route, Routes } from "react-router-dom";
 import PageLoader from "./components/uncommen/PageLoader";
-import {fetchReciterDescription} from "./utility/gemini";
-
 
 // Lazy-loaded components
-const Header = lazy(() => import("./components/commen/Header"));
+import Header from "./components/commen/Header";
 const Player = lazy(() => import("./components/commen/Player"));
-const Sidebar = lazy(() => import("./components/commen/Sidebar"));
+import Sidebar from "./components/commen/Sidebar";
+import IsAuth from "./auth/IsAuth";
+import ProtectAuthPages from "./auth/ProtectAuthPages";
 const Home = lazy(() => import("./pages/Home"));
 const ListSurahOfReciter = lazy(() => import("./pages/ListSurahOfReciter"));
 const Login = lazy(() => import("./pages/Login"));
@@ -30,9 +30,6 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    fetchReciterDescription("Abdul Basit Abdul Samad").then((description) => {
-      console.log("Reciter Description:", description);
-    })
     dispatch(listenToAuthChanges());
   }, [dispatch]);
 
@@ -49,7 +46,13 @@ function App() {
                 <div className="hero flex gap-2 m-2 sticky min-h-screen top-[100px] ">
                   <Sidebar />
                   <div className="main-display w-full">
-                    <Suspense fallback={<div className="min-h-screen flex items-center justify-center "><PageLoader /></div>}>
+                    <Suspense
+                      fallback={
+                        <div className="min-h-screen flex items-center justify-center ">
+                          <PageLoader />
+                        </div>
+                      }
+                    >
                       <Outlet />
                     </Suspense>
                     <Footer />
@@ -59,15 +62,13 @@ function App() {
             }
           >
             <Route path="/" element={<Home />} />
-            <Route
-              path="/profile"
-              element={
-                
-                  <ProfilePage />
-                
-              }
-            />
+            {/* Protected Routes */}
+            <Route element={<IsAuth />}>
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+
+            {/* Public Routes */}
             <Route path="/reciters" element={<AllReciters />} />
             <Route path="/reciter" element={<ListSurahOfReciter />} />
             <Route path="/library/:libraryId" element={<LibraryContent />} />
@@ -77,8 +78,13 @@ function App() {
             <Route path="/live" element={<YouTubeLive />} />
           </Route>
 
+            {/* Auth Routes  */}
+          <Route element={<ProtectAuthPages />}>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          </Route>
+
+          {/* Error Route */}
           <Route path="*" element={<ErrorPage />} />
         </Routes>
         <Player />

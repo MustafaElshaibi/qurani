@@ -143,7 +143,7 @@ const Sidebar = () => {
               >
                 <FaReadme className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] hidden  sm:block sm:text-sm  text-nowrap  ">
-                  {lang === 'ar' ? "السور" : "The Surah's"}
+                  {lang === 'ar' ? "السور" : "Chapters"}
                 </span>
               </NavLink>
               <NavLink

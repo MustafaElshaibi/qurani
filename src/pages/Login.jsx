@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FaFacebook, FaQuran } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { loginWithEmail, signWithGoogle } from "../rtk/Reducers/AuthReducer";
+import { loginWithEmail, signWithFacebook, signWithGoogle } from "../rtk/Reducers/AuthReducer";
 import { FcGoogle } from "react-icons/fc";
 import { ImAppleinc } from "react-icons/im";
 import { ErrorPage } from "./Error";
@@ -93,7 +93,7 @@ function Login() {
                 continue with google
               </span>
             </div>
-            <div className="auth-with cursor-pointer w-full py-2  flex  items-center  px-3 border-1 border-white rounded-full">
+            <div onClick={()=> dispatch(signWithFacebook())} className="auth-with cursor-pointer w-full py-2  flex  items-center  px-3 border-1 border-white rounded-full">
               <FaFacebook className="text-[#1877f2] mr-23 max-sm:mr-9 size-7 ml-5" />
               <span className="text-white  capitalize   max-sm:text-sm text-nowrap">
                 continue with facebook

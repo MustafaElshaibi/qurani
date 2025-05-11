@@ -52,7 +52,6 @@ const createRequestManager = () => {
       if (!response.ok) throw new Error("API request failed");
 
       const data = await response.json();
-      console.log(data)
       // Find first square-shaped face image
       const validImage = data.items?.find((item) => {
         const img = item.image;

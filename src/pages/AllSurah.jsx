@@ -6,11 +6,12 @@ import { FiChevronRight } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { setLanguage } from "../rtk/Reducers/langSlice";
 import { ErrorPage } from "./Error";
+import PageLoader from "../components/uncommen/PageLoader";
 
 
 const AllSurah = () => {
   const lang = useSelector((state) => state.lang);
-  const { data, loading, error, isFetching  } = useGetAllRecitersQuery(lang);
+  const { data, loading, error, isFetching , refetch } = useGetAllRecitersQuery(lang);
   const {data: suwarData, isFetching: fetchSuwar, isLoading: isLoadSuwar } = useGetAllSurahDetailsQuery(lang);
   const loader = loading || !data;
   const dispatch = useDispatch();
@@ -25,7 +26,22 @@ const AllSurah = () => {
 
 
 
-  if(error) <ErrorPage />
+ if (error) {
+     return (
+       <div className="w-full bg-[#121212] flex items-center justify-center rounded-lg p-6 space-y-8 min-h-screen">
+         <div className="cont">
+           <button
+             onClick={() => refetch()}
+             className="px-7 py-3 rounded-full mx-auto  bg-white text-black cursor-pointer block w-fit font-bold"
+           >
+             Retry
+           </button>
+           {error && <p className="text-white mt-2 ">Trying to reconnect...</p>}
+           {isFetching && <PageLoader />}
+         </div>
+       </div>
+     );
+   }
 
 
   return (
