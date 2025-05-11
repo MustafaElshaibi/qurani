@@ -18,7 +18,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['player/playTrack'],
+        ignoredActions: ['player/playTrack', 'auth/setUser'],
         ignoredPaths: ['player.currentSurah.reciter', 'player.queue'],
         warnAfter: 50,
       },
