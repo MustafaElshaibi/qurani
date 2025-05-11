@@ -8,6 +8,6 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss(),
   ],
-  
+  base: import.meta.env.VITE_BASE_URL || '/qurani',
   
 })
