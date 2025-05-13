@@ -1,6 +1,6 @@
 
 
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { FaPause, FaPlay, FaMosque } from "react-icons/fa";
 import { LiaKaabaSolid } from "react-icons/lia";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,18 +9,14 @@ import Cookies from "universal-cookie";
 import ModualSignIn from "./ModualSignIn";
 import {  Link, useNavigate } from "react-router-dom";
 import HeartFavorite from "./HeartFavorite";
-import { addToLibrary, selectIsInPlayList } from "../../rtk/Reducers/LibraryReducer";
 import { TbCirclePlus } from "react-icons/tb";
-import { MdFormatListBulletedAdd, MdLibraryAdd, MdOutlinePlaylistRemove } from "react-icons/md";
-import { createSelector } from "@reduxjs/toolkit";
-import LibraryAvailable from "../libraries/librariesAvailable";
+import LibraryAvailable from "../libraries/LibrariesAvailable";
 
 
 const cookies = new Cookies();
 
 function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
   const lang = useSelector((state)=> state.lang);
-  const libraries = useSelector((state)=> state.libraries);
   const { isPlaying, currentSurah, currentTime, duration } = useSelector(
     (state) => state.player
   );
@@ -66,28 +62,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
 
 
 
- const handleAddToLibrary = (lib)=> {
-    setShowLib(false);
-    dispatch(addToLibrary({
-      libraryId: lib.id,
-      song: surahData,
-    }))
-    
- }
-
-
-  const lib = ()=> {
-    const isInPlaylist = useSelector((state) => { selectIsInPlayList(state, lib.id, surahData.id) });
-    return (
-      <ul className=" absolute w-fit px-3 py-2 rounded-lg bottom-5 right-3 bg-search-dark text-white ">
-            {
-              libraries?.libraries.map((lib)=> (
-                <li key={lib.id} onClick={()=> handleAddToLibrary(lib)} className=" not-last:border-b-1 flex items-center justify-between gap-2 not-last:border-b-gray py-2 px-3  hover:bg-gray/20 transition-colors cursor-pointer">{lib?.name} <span>{isInPlaylist ? <MdOutlinePlaylistRemove /> : <MdFormatListBulletedAdd />} </span></li>
-              ))
-            }
-          </ul>
-    )
-  }
+ 
 
 
 

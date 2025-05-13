@@ -34,6 +34,10 @@ export default function Header() {
       return;
     }
     if(query && query != undefined){
+      if ('makkia' in query) {
+        navigate(`/surah?q=${encodeURIComponent(query?.id)}`);
+        return;
+      }
       navigate(`/search?q=${encodeURIComponent(query?.id)}`);
       closeMenu();
     }else if(!query && isInputFocused) {

@@ -1,20 +1,23 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CiSearch } from "react-icons/ci";
-import { useGetAllRecitersQuery } from "../../rtk/Services/QuranApi";
+import { useGetAllRecitersQuery, useGetAllSurahDetailsQuery } from "../../rtk/Services/QuranApi";
 
 const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus }) => {
   const [query, setQuery] = useState("");
   const { data: AllRecitersEng } = useGetAllRecitersQuery("eng");
   const { data: AllRecitersAr } = useGetAllRecitersQuery("ar");
+  const { data: AllSurahAr } = useGetAllSurahDetailsQuery("ar");
+  const { data: AllSurahEng } = useGetAllSurahDetailsQuery("eng");
   const [data, setData] = useState([]);
   const [filterdData, setFilterdData] = useState([]);
   const timeoutRef = useRef(null);
   const blurTimeout = useRef(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
+
   useEffect(()=> {
     onFocus(isInputFocused);
-  }, [isInputFocused])
+  }, [isInputFocused, onFocus])
 
   // Handle input focus
   const handleFocus = () => {
@@ -42,22 +45,28 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
     return () => clearTimeout(blurTimeout.current);
   }, []);
 
-  // fetch the data on mount
+  // Fetch and merge data on mount or when API data changes
   useEffect(() => {
     try {
-      if (AllRecitersAr?.reciters) {
-        setData((prev) => prev.concat(AllRecitersAr?.reciters));
-      }
-      if (AllRecitersEng?.reciters) {
-        setData((prev) => prev.concat(AllRecitersEng?.reciters));
-        setFilterdData(AllRecitersEng?.reciters);
-      }
+      let mergedData = [];
+      if (AllRecitersAr?.reciters) mergedData = mergedData.concat(AllRecitersAr.reciters);
+      if (AllRecitersEng?.reciters) mergedData = mergedData.concat(AllRecitersEng.reciters);
+      if (AllSurahAr?.suwar) mergedData = mergedData.concat(AllSurahAr.suwar);
+      if (AllSurahEng?.suwar) mergedData = mergedData.concat(AllSurahEng.suwar);
+
+      // Remove duplicates by id (if exists)
+      const uniqueData = Array.from(
+        new Map(mergedData.map(item => [item.name, item])).values()
+      );
+
+      setData(uniqueData);
+      setFilterdData(uniqueData);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setData([]);
       setFilterdData([]);
     }
-  }, [AllRecitersEng, AllRecitersAr]);
+  }, [AllRecitersEng, AllRecitersAr, AllSurahAr, AllSurahEng]);
 
   // filter the data on user query change
   useEffect(() => {
@@ -85,10 +94,10 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
   };
 
   // Action to perform after user stops typing
-  const handleUserStoppedTyping = () => {
+  const handleUserStoppedTyping = useCallback(() => {
     if (filterdData.length > 0 && query.length > 3) onSearch(filterdData?.[0]);
     else onSearch(null);
-  };
+  }, [filterdData, query, onSearch]);
 
   // Debounce effect
   useEffect(() => {
@@ -111,7 +120,7 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [query]);
+  }, [query, handleUserStoppedTyping, mobile]);
 
 
 
@@ -151,9 +160,10 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
                 onMouseDown={(e) => e.preventDefault()}
                 key={`${index}${item.id}`}
                 onClick={() => handleItemClick(item)}
-                className="w-full text-white text-lg not-last:border-b-1 not-last:border-gray-300  py-3.5 cursor-pointer font-medium hover:bg-gray/20 px-5  "
+                className="w-full text-white flex items-center gap-3 text-lg not-last:border-b-1 not-last:border-gray-300  py-3.5 cursor-pointer font-medium hover:bg-gray/20 px-4  "
               >
-                {item?.name}
+                <div>{index + 1 }</div>
+                <div className="capitalize">{item?.name}</div>
               </li>
             ))}
           </ul>

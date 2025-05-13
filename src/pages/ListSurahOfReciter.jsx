@@ -2,20 +2,18 @@ import { MdVerified } from "react-icons/md";
 import { IoIosMore } from "react-icons/io";
 import PlayButton from "../components/commen/PlayButton";
 import SurahListItem from "../components/uncommen/SurahListItem";
-import {  useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   useGetAllSurahDetailsQuery,
   useGetReciterQuery,
 } from "../rtk/Services/QuranApi";
-import { useEffect,  useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import avatar from "../assets/images/avtr.png";
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import ViewsCount from "../components/commen/ViewsCount";
-import {requestManager} from "../utility/requestManager";
+import { requestManager } from "../utility/requestManager";
 import PageLoader from "../components/uncommen/PageLoader";
-
-
-
+import { fetchReciterDescription } from "../utility/gemini";
 
 function ListSurahOfReciter() {
   const [searchParams] = useSearchParams();
@@ -27,90 +25,87 @@ function ListSurahOfReciter() {
     lang,
   });
   const { data: suwarData } = useGetAllSurahDetailsQuery(lang);
-  const [surahUrls, setSurahUrls] = useState([]);
   const reciter = data?.reciters?.[0] || null;
   const moshaf = reciter?.moshaf?.[0];
-  const [reciterImg, setReciterImg] = useState(null);
+  const [reciterImg, setReciterImg] = useState(avatar);
   const [isImgLoading, setIsImgLoading] = useState(true);
-console.log(reciter)
-  useEffect(()=> {
+  const [discription, setDiscription] = useState("");
+
+  const loadReciterInfo = async (reciterName) => {
+    try {
+      const info = await fetchReciterDescription(reciterName);
+      setDiscription(info);
+    } catch (err) {
+      setDiscription('');
+    } 
+  };
+  // Set document title
+  useEffect(() => {
     if (reciter?.name) {
       document.title = `${reciter?.name} - Quran App`;
+      loadReciterInfo(reciter?.name);
     }
   }, [reciter?.name]);
-
-
-  // handel grandinat on scroll
+  // Handle sticky header on scroll (throttled)
   useEffect(() => {
-    const handleScroll = () => {
-      setIsSticky(window.scrollY > 100);
-    };
-
+    const handleScroll = () => setIsSticky(window.scrollY > 100);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Make Reciter Image
+  // Fetch reciter image only when reciter changes
   useEffect(() => {
     let isMounted = true;
-    const controller = new AbortController();
-
-    const fetchImage = async () => {
-      if (!reciter?.name) return;
-      
-      try {
-        const imageUrl = await requestManager.getImage(reciter.id, reciter.name);
-        if (isMounted && imageUrl) {
-          setReciterImg(imageUrl);
-        }
-      } catch (error) {
+    setIsImgLoading(true);
+    if (!reciter?.name) {
+      setReciterImg(avatar);
+      setIsImgLoading(false);
+      return;
+    }
+    requestManager
+      .getImage(reciter.id, reciter.name)
+      .then((imageUrl) => {
+        if (isMounted) setReciterImg(imageUrl || avatar);
+      })
+      .catch(() => {
         if (isMounted) setReciterImg(avatar);
-      } finally {
+      })
+      .finally(() => {
         if (isMounted) setIsImgLoading(false);
-      }
-    };
-
-    fetchImage();
-
+      });
     return () => {
       isMounted = false;
-      controller.abort();
     };
-  }, [reciter]);
+  }, [reciter?.id, reciter?.name]);
 
-  // make Surah object
-  useEffect(() => {
-    const generateSurahData = async () => {
-      if (!moshaf?.surah_list || !moshaf?.server || !suwarData) return;
-
-      const surahPromises = moshaf.surah_list.split(",").map((num) => {
-        const surahDetail = suwarData?.suwar.find((surah) => surah.id == num);
-        const formatted = num.padStart(3, "0");
-        const url = `${moshaf.server}${formatted}`;
-
-        return {
-          id:  `${reciter?.id}-${num}`,
-          surahId: `${surahDetail?.id}`,
-          url: `${url}.mp3`,
-          number: parseInt(num, 10),
-          name: surahDetail?.name || "Unknown Surah",
-          makkia: surahDetail?.makkia || 0,
-          reciter: {
-            id: `${reciter?.id}`,
-            name: reciter?.name,
-            moshaf: moshaf?.name,
-            imgUrl: reciterImg,
-          },
-        };
-      });
-
-      const surahData = await Promise.all(surahPromises);
-      setSurahUrls(surahData.filter(Boolean));
-    };
-
-    generateSurahData();
+  // Memoize surahUrls for performance
+  const surahUrls = useMemo(() => {
+    if (!moshaf?.surah_list || !moshaf?.server || !suwarData) return [];
+    return moshaf.surah_list.split(",").map((num) => {
+      const surahDetail = suwarData?.suwar.find((surah) => surah.id == num);
+      const formatted = num.padStart(3, "0");
+      const url = `${moshaf.server}${formatted}`;
+      return {
+        id: `${reciter?.id}-${num}`,
+        surahId: `${surahDetail?.id}`,
+        url: `${url}.mp3`,
+        number: parseInt(num, 10),
+        name: surahDetail?.name || "Unknown Surah",
+        makkia: surahDetail?.makkia || 0,
+        reciter: {
+          id: `${reciter?.id}`,
+          name: reciter?.name,
+          moshaf: moshaf?.name,
+          imgUrl: reciterImg,
+        },
+      };
+    });
   }, [moshaf, suwarData, reciter, reciterImg]);
 
+  // PlayButton handler (memoized)
+  const handlePlayAll = useCallback(() => {
+    // Implement play all logic if needed
+  }, [surahUrls]);
 
   // Handle Retry Logic
   if (error) {
@@ -129,58 +124,13 @@ console.log(reciter)
       </div>
     );
   }
-  
 
   return (
     <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
       {isLoading || isFetching ? (
-        /* Skeleton Loading State */
-        <>
-          <div className="top relative min-h-[300px] px-5 py-7 animate-pulse">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-7 h-7 bg-gray-700 rounded-full" />
-              <div className="h-5 bg-gray-700 rounded w-32" />
-            </div>
-            <div className="h-20 bg-gray-700 rounded-full w-3/4 mb-7 max-sm:w-full" />
-            <div className="h-4 bg-gray-700 rounded w-48" />
-          </div>
-
-          <div className="down">
-            <div className="actions flex items-center gap-2 sm:gap-6 p-2 sm:p-5">
-              <div className="w-[70px] h-[70px] bg-gray-700 rounded-full" />
-              <div className="w-24 h-10 bg-gray-700 rounded-full" />
-              <div className="w-7 h-7 bg-gray-700 rounded-full" />
-            </div>
-
-            <div className="list mt-4 px-5 py-4">
-              <div className="h-8 bg-gray-700 rounded w-48 mb-6" />
-              <div className="surah-list flex flex-col gap-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-14 bg-gray-700 rounded" />
-                ))}
-              </div>
-
-              <div className="about flex flex-col mb-5 mt-14">
-                <div className="h-8 bg-gray-700 rounded w-48 mb-6" />
-                <div className="info relative w-[80%] max-sm:w-full">
-                  <div className="w-full h-[700px] max-sm:h-[300px] bg-gray-700 rounded-lg" />
-                  <div className="absolute left-5 bottom-5 p-5 w-[90%]">
-                    <div className="h-4 bg-gray-600 rounded w-48 mb-3" />
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-600 rounded w-full" />
-                      <div className="h-3 bg-gray-600 rounded w-4/5" />
-                      <div className="h-3 bg-gray-600 rounded w-3/4" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        <PageLoader />
       ) : (
-        /* Actual Content */
         <>
-          {/* Original content here */}
           <div
             className={`top relative  min-h-[300px] px-5 py-7 ${
               isSticky &&
@@ -205,7 +155,7 @@ console.log(reciter)
               }`}
             >
               <PlayButton
-                onClick={onclick}
+                onClick={handlePlayAll}
                 surahQueue={surahUrls}
                 w={"70px"}
                 h={"70px"}
@@ -220,7 +170,7 @@ console.log(reciter)
             </div>
             <div className="list mt-4 px-5 py-4">
               <h3 className="text-3xl font-bold text-heading capitalize mb-6">
-                {lang === 'eng' ? "Chapters" : "السور"}
+                {lang === "eng" ? "Chapters" : "السور"}
               </h3>
               <div className="surah-list flex flex-col gap-3  ">
                 {surahUrls.map((surah, i) => (
@@ -234,7 +184,7 @@ console.log(reciter)
               </div>
               <div className="about flex flex-col  mb-5 mt-14">
                 <h3 className="text-3xl font-bold text-heading capitalize mb-6">
-                  { lang === 'eng' ? "About" : "حول"}
+                  {lang === "eng" ? "About" : "حول"}
                 </h3>
                 {isImgLoading ? (
                   <div className="info relative w-[80%] max-sm:w-full">
@@ -263,6 +213,7 @@ console.log(reciter)
                     <div className="txt absolute left-5 bottom-5 z-20 p-5">
                       <ViewsCount reciter={reciter} />
                       <div className="text-white capitalize text-lg max-sm:text-xs ">
+                        {discription}
                         Lorem ipsum dolor sit, amet consectetur adipisicing
                         elit. Sapiente optio voluptatem voluptas veritatis
                         excepturi possimus beatae voluptatibus cumque ipsam,
