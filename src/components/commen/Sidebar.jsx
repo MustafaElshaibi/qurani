@@ -12,7 +12,7 @@ import {
   createLibrary,
   deleteLibrary,
 } from "../../rtk/Reducers/LibraryReducer";
-import LibraryList from "../libraries/libraryList";
+import LibraryList from "../libraries/LibraryList";
 import { MdLanguage } from "react-icons/md";
 import LanguageBtn from "../uncommen/LanguageBtn";
 
