@@ -47,12 +47,12 @@ function App() {
             element={
               <>
                 <Header />
-                <div className="hero flex gap-2 m-2 sticky min-h-screen top-[100px] ">
+                <div className="hero flex gap-1.5 mx-1 my-1  h-screen"> 
                   <Sidebar />
-                  <div className="main-display w-full">
+                  <div className="main-display w-full min-h-screen overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:appearance-none">
                     <Suspense
                       fallback={
-                        <div className="min-h-screen flex items-center justify-center ">
+                        <div className="h-screen flex items-center justify-center ">
                           <PageLoader />
                         </div>
                       }

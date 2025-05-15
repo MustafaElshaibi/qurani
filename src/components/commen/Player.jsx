@@ -315,7 +315,7 @@ const Player = () => {
               showFull ? "h-screen flex-col justify-between" : "h-[80px]"
             }`}
           >
-            {/* mini show  */}
+            {/* small bar in bottom   */}
             <div
               className={`minishow relative w-full h-full ${
                 showFull ? "hidden" : "block"
@@ -413,12 +413,14 @@ const Player = () => {
               </div>
             </div>
 
+
+            {/* full player for mobile */}
             <div
               className={`surah-info grow w-full p-5 transition-all duration-500 flex flex-col items-center gap-4 ${
                 showFull ? "block" : "max-sm:hidden"
               }`}
             >
-              <div className="flex items-center justify-between w-full my-2">
+              <div className="flex items-center justify-between w-full mb-2 mt-8">
                 <IoIosArrowDown
                   onClick={() => setShowFull(!showFull)}
                   className="text-white cursor-pointer size-6 "
@@ -429,7 +431,7 @@ const Player = () => {
                 <img
                   src={currentSurah?.reciter?.imgUrl}
                   alt=""
-                  className="w-full h-[400px] rounded-lg object-cover"
+                  className="w-full h-[300px] rounded-lg object-cover"
                 />
               ) : (
                 <div className="text-gray w-full h-[400px] bg-main-black rounded-lg  animate-pulse flex items-center justify-center">

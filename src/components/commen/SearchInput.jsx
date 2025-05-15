@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { useGetAllRecitersQuery, useGetAllSurahDetailsQuery } from "../../rtk/Services/QuranApi";
+import { useLocation } from "react-router-dom";
 
 const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus }) => {
   const [query, setQuery] = useState("");
@@ -13,7 +14,14 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
   const timeoutRef = useRef(null);
   const blurTimeout = useRef(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const loacation = useLocation();
 
+  console.log(location)
+  useEffect(()=> {
+    if (loacation.pathname !== "/search") {
+      setQuery("");
+    }
+  }, [loacation.pathname])
 
   useEffect(()=> {
     onFocus(isInputFocused);

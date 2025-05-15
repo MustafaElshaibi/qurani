@@ -9,7 +9,7 @@ const cookie = new Cookies();
 
 
 
-function PlayButton({onClick, surahQueue, w, h, p}) {
+function PlayButton({surahQueue}) {
   const token = cookie.get("auth-token");
     const [showSignInModal, setShowSignInModal] = useState(false);
     const navigate = useNavigate();
@@ -34,8 +34,8 @@ function PlayButton({onClick, surahQueue, w, h, p}) {
         onClose={() => setShowSignInModal(false)}
         onSignIn={() => navigate('/login')}
       />
-    <div onClick={handlePlayList} className={`play transition-all duration-300 rounded-full hover:bg-green-500 bg-green-400  cursor-pointer flex items-center justify-center`} style={{width: w, height: h}}>
-    <FaPlay className='text-black' style={{width: p, height: p}} />
+    <div onClick={handlePlayList} className={`play  rounded-full hover:bg-green-500 bg-green-400  cursor-pointer flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16  shadow-lg hover:shadow-xl`}>
+    <FaPlay className='text-black size-4 sm:size-6' />
   </div>
    </>
   )

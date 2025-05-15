@@ -2,7 +2,6 @@ import { createSelector } from "@reduxjs/toolkit";
 import { memo, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToLibrary, removeFromLibrary } from "../../rtk/Reducers/LibraryReducer";
-import { MdFormatListBulletedAdd, MdOutlinePlaylistRemove } from "react-icons/md";
 import { BsBookmarkFill, BsBookmarkXFill } from "react-icons/bs";
 
 // Memoized selector outside the component

@@ -1,6 +1,6 @@
 // librariesSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { debounce } from "lodash";
+
 
 // System libraries configuration (always first)
 const SYSTEM_LIBRARIES = [
@@ -92,7 +92,7 @@ const librariesSlice = createSlice({
       } else {
         favoritesLib.items.splice(songIndex, 1);
       }
-      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+      persistState(state);
     },
 
     // Create new library (insert after system libraries)
@@ -106,7 +106,7 @@ const librariesSlice = createSlice({
           state.libraries.splice(insertIndex, 0, action.payload);
         }
         state.activeLibraryId = action.payload.id;
-        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+       persistState(state);
       },
       prepare: (name) => ({
         payload: {
@@ -125,7 +125,7 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library?.type === "user" && newName.trim()) {
         library.name = newName.trim();
-        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+        persistState(state);
       }
     },
 
@@ -141,14 +141,14 @@ const librariesSlice = createSlice({
       if (state.activeLibraryId === libraryId) {
         state.activeLibraryId = "favorites";
       }
-      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+      persistState(state);
     },
 
     // Set active library (with system fallback)
     setActiveLibrary: (state, action) => {
       const isValid = state.libraries.some((l) => l.id === action.payload);
       state.activeLibraryId = isValid ? action.payload : "favorites";
-      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+      persistState(state);
     },
 
     // Reorder libraries (user libraries only)
@@ -160,7 +160,7 @@ const librariesSlice = createSlice({
       userLibs.splice(action.payload.endIndex, 0, removed);
 
       state.libraries = [...systemLibs, ...userLibs];
-      debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+     persistState(state);
     },
 
     // Add song to specific library
@@ -169,7 +169,7 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library && !library.items.some((s) => s.id === song.id)) {
         library.items.push(song);
-        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+        persistState(state);
       }
     },
 
@@ -179,7 +179,7 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library) {
         library.items = library.items.filter((s) => s.id !== songId);
-        debounce(()=> persistState(state), 1000); // Debounce to avoid excessive writes
+       persistState(state);
       }
     },
   },

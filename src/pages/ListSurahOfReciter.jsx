@@ -128,7 +128,49 @@ function ListSurahOfReciter() {
   return (
     <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
       {isLoading || isFetching ? (
-        <PageLoader />
+        /* Skeleton Loading State */
+        <>
+          <div className="top relative min-h-[300px] px-5 py-7 animate-pulse">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-7 h-7 bg-gray-700 rounded-full" />
+              <div className="h-5 bg-gray-700 rounded w-32" />
+            </div>
+            <div className="h-20 bg-gray-700 rounded-full w-3/4 mb-7 max-sm:w-full" />
+            <div className="h-4 bg-gray-700 rounded w-48" />
+          </div>
+
+          <div className="down">
+            <div className="actions flex items-center gap-2 sm:gap-6 p-2 sm:p-5">
+              <div className="w-[70px] h-[70px] bg-gray-700 rounded-full" />
+              <div className="w-24 h-10 bg-gray-700 rounded-full" />
+              <div className="w-7 h-7 bg-gray-700 rounded-full" />
+            </div>
+
+            <div className="list mt-4 px-5 py-4">
+              <div className="h-8 bg-gray-700 rounded w-48 mb-6" />
+              <div className="surah-list flex flex-col gap-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-14 bg-gray-700 rounded" />
+                ))}
+              </div>
+
+              <div className="about flex flex-col mb-5 mt-14">
+                <div className="h-8 bg-gray-700 rounded w-48 mb-6" />
+                <div className="info relative w-[80%] max-sm:w-full">
+                  <div className="w-full h-[700px] max-sm:h-[300px] bg-gray-700 rounded-lg" />
+                  <div className="absolute left-5 bottom-5 p-5 w-[90%]">
+                    <div className="h-4 bg-gray-600 rounded w-48 mb-3" />
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-600 rounded w-full" />
+                      <div className="h-3 bg-gray-600 rounded w-4/5" />
+                      <div className="h-3 bg-gray-600 rounded w-3/4" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       ) : (
         <>
           <div
@@ -150,22 +192,19 @@ function ListSurahOfReciter() {
           </div>
           <div className="down   bg-gradient-to-b from-blue-500/30 from-1% to-5%  to-second-black ">
             <div
-              className={`actions flex items-center gap-6 p-5 ${
-                isSticky && "sticky top-[100px] z-20 backdrop-blur-sm "
+              className={`actions flex items-center gap-4 sm:gap-6 py-3 sm:py-4 px-5 ${
+                isSticky && "sticky top-[90px] z-20 backdrop-blur-lg "
               }`}
             >
               <PlayButton
                 onClick={handlePlayAll}
                 surahQueue={surahUrls}
-                w={"70px"}
-                h={"70px"}
-                p={"27px"}
               />
-              <button className="block py-2 px-5 rounded-full cursor-pointer border-1 border-white text-white">
+              <button className="block py-1 px-3 max-sm:text-sm font-medium sm:py-2 sm:px-5 rounded-full cursor-pointer border-1 border-white text-white">
                 Follow
               </button>
               <button className="cursor-pointer ">
-                <IoIosMore className="text-white size-7 font-bold " />
+                <IoIosMore className="text-white size-5 sm:size-7 font-bold " />
               </button>
             </div>
             <div className="list mt-4 px-5 py-4">

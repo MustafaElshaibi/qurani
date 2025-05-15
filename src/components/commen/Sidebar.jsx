@@ -13,7 +13,6 @@ import {
   deleteLibrary,
 } from "../../rtk/Reducers/LibraryReducer";
 import LibraryList from "../libraries/LibraryList";
-import { MdLanguage } from "react-icons/md";
 import LanguageBtn from "../uncommen/LanguageBtn";
 
 const Sidebar = () => {
@@ -36,7 +35,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="sidebar bg-second-black rounded-lg p-2 sm:p-4 sticky top-[100px] max-h-[calc(100vh-100px)] sm:w-[300px] lg:w-[400px] max-sm:w-[70px] transition-all duration-300">
+      <div className="sidebar bg-second-black overflow-y-auto overflow-x-hidden rounded-lg p-2 sm:p-4 sticky top-[100px] max-h-[calc(100vh-100px)] sm:w-[300px] lg:w-[400px] xl:w-[500px] w-[70px] transition-all duration-300 [&::-webkit-scrollbar]:appearance-none">
         <div className="flex flex-col gap-4">
           <RxHamburgerMenu
             onClick={() => setShowOnMobile(!showOnMobile)}
@@ -112,7 +111,7 @@ const Sidebar = () => {
                 <GoHomeFill className="text-btns w-5 h-5" />
                 <span
                   className="text-heading font-medium text-nowrap 
-                  hidden sm:block sm:text-sm md:text-[19px]"
+                  hidden sm:block sm:text-sm  md:text-[19px] "
                 >
                   {lang === 'ar' ? 'الرئيسية' : 'Home'}
                 </span>
@@ -166,7 +165,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile full Sidebar */}
       {showOnMobile && (
         <div
           className={`sidebar w-full z-30 bg-second-black rounded-lg sm:hidden transition-transform duration-300 p-3 min-h-screen fixed top-[80px] ${
@@ -248,7 +247,7 @@ const Sidebar = () => {
                   className="text-heading font-medium text-nowrap 
                   block  md:text-[19px]"
                 >
-                  Home
+                  {lang === 'ar' ? 'الرئيسية' : 'Home'}
                 </span>
               </NavLink>
 
@@ -264,7 +263,7 @@ const Sidebar = () => {
               >
                 <GiSoundOn className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] block   text-nowrap  ">
-                  Reciters
+                  {lang === 'ar' ? "القراء" : 'Reciters'}
                 </span>
               </NavLink>
               <NavLink
@@ -279,7 +278,7 @@ const Sidebar = () => {
               >
                 <FaReadme className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] block   text-nowrap  ">
-                  surah
+                  {lang === 'ar' ? "السور" : "Chapters"}
                 </span>
               </NavLink>
               <NavLink
@@ -294,14 +293,11 @@ const Sidebar = () => {
               >
                 <IoIosRadio className="size-5 text-btns" />
                 <span className="text-heading font-medium md:text-[19px] block   text-nowrap  ">
-                  radio
+                  {lang === 'ar' ? "مباشر" : "Live"}
                 </span>
               </NavLink>
             </ul>
-            <button className="lang  mt-17 px-4 py-2 flex items-center gap-2 text-white cursor-pointer border-1 border-white rounded-full">
-              <MdLanguage className="text-white size-6" />
-              Language
-            </button>
+            <LanguageBtn classname={'mt-8! px-3 py-2 justify-baseline '}  />
           </div>
           
         </div>

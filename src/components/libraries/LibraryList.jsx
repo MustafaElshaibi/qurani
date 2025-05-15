@@ -37,7 +37,10 @@ const LibraryList = ({setContextMenu, setEditingLibraryId, editingLibraryId, edi
   };
 
   return (
-    <div className="libraries-list max-h-[calc(100vh-650px)]  overflow-y-auto ">
+    <div className="libraries-list max-h-[calc(100vh-650px)]  overflow-y-auto [&::-webkit-scrollbar]:w-[3px]
+  [&::-webkit-scrollbar-track]:bg-gray-300
+  [&::-webkit-scrollbar-thumb]:bg-blue-500
+  [&::-webkit-scrollbar-thumb]:rounded-full ">
               {libraries.map((library) => (
                 <div
                   key={library.id}
