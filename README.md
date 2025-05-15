@@ -119,7 +119,7 @@ src/
 
 ## 📝 License
 
-This project is for educational and personal use. Please review font and API licenses before deploying commercially.
+This project is for educational and personal use it doesn't have any license if you want to inhance then god bless you. Please review font and API licenses before deploying commercially.
 
 ---
 
