@@ -16,7 +16,6 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
   const [isInputFocused, setIsInputFocused] = useState(false);
   const loacation = useLocation();
 
-  console.log(location)
   useEffect(()=> {
     if (loacation.pathname !== "/search") {
       setQuery("");
