@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { listenToAuthChanges } from "./rtk/Reducers/AuthReducer";
 import { Outlet, Route, Routes } from "react-router-dom";
 import PageLoader from "./components/uncommen/PageLoader";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Lazy-loaded components
 import Header from "./components/commen/Header";
@@ -35,6 +36,7 @@ function App() {
 
   return (
     <>
+    <SpeedInsights />
       {/* <Home /> */}
       <div className="min-h-screen">
         <Routes>
