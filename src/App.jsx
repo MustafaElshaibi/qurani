@@ -4,6 +4,7 @@ import { listenToAuthChanges } from "./rtk/Reducers/AuthReducer";
 import { Outlet, Route, Routes } from "react-router-dom";
 import PageLoader from "./components/uncommen/PageLoader";
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from "@vercel/analytics/react"
 
 // Lazy-loaded components
 import Header from "./components/commen/Header";
@@ -37,6 +38,7 @@ function App() {
   return (
     <>
     <SpeedInsights />
+     <Analytics />
       {/* <Home /> */}
       <div className="min-h-screen">
         <Routes>
