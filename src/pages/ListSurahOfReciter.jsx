@@ -13,7 +13,7 @@ import { useSelector } from "react-redux";
 import ViewsCount from "../components/commen/ViewsCount";
 import { requestManager } from "../utility/requestManager";
 import PageLoader from "../components/uncommen/PageLoader";
-import { fetchReciterDescription } from "../utility/gemini";
+import { IoLocationSharp } from "react-icons/io5";
 
 function ListSurahOfReciter() {
   const [searchParams] = useSearchParams();
@@ -27,56 +27,83 @@ function ListSurahOfReciter() {
   const { data: suwarData } = useGetAllSurahDetailsQuery(lang);
   const reciter = data?.reciters?.[0] || null;
   const moshaf = reciter?.moshaf?.[0];
-  const [reciterImg, setReciterImg] = useState(avatar);
+  const [reciterInfo, setReciterInfo] = useState({
+    img: avatar,
+    description: "",
+    country: "",
+    url: "",
+  });
   const [isImgLoading, setIsImgLoading] = useState(true);
-  const [discription, setDiscription] = useState("");
+  const [showFullDesc, setShowFullDesc] = useState(false);
+  const maxDescLength = 250;
 
-  const loadReciterInfo = async (reciterName) => {
-    try {
-      const info = await fetchReciterDescription(reciterName);
-      setDiscription(info);
-    } catch (err) {
-      setDiscription('');
-    } 
-  };
+  const loadReciterInfo = useCallback(
+    async (reciterName) => {
+      setIsImgLoading(true);
+      if (!reciterName) {
+        setReciterInfo((prev) => ({ ...prev, img: avatar, description: "" }));
+        setIsImgLoading(false);
+        return;
+      }
+      try {
+        const info = await requestManager.getReciterInfo(
+          reciter.id,
+          reciterName
+        );
+        if (!info?.img) {
+          setReciterInfo((prev) => ({ ...prev, img: avatar }));
+          setIsImgLoading(false);
+          return;
+        }
+        if (!info.description) {
+          setReciterInfo((prev) => ({ ...prev, description: "" }));
+          setIsImgLoading(false);
+          return;
+        }
+        setReciterInfo((prev) => ({
+          ...prev,
+          img: info?.img,
+          description: info?.description,
+          country: info?.country,
+          url: info?.url,
+        }));
+        setIsImgLoading(false);
+      } catch (err) {
+        console.log(err);
+        setReciterInfo((prev) => ({ ...prev, img: avatar, description: "" }));
+        setIsImgLoading(false);
+      } finally {
+        setIsImgLoading(false);
+      }
+    },
+    [reciter?.id]
+  );
   // Set document title
   useEffect(() => {
     if (reciter?.name) {
       document.title = `${reciter?.name} - Quran App`;
       loadReciterInfo(reciter?.name);
     }
-  }, [reciter?.name]);
+  }, [reciter?.name, loadReciterInfo]);
+
   // Handle sticky header on scroll (throttled)
   useEffect(() => {
-    const handleScroll = () => setIsSticky(window.scrollY > 100);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // Get the target element
+    const reciterDiv = document.querySelector(".main-display ");
+    if (!reciterDiv) return;
 
-  // Fetch reciter image only when reciter changes
-  useEffect(() => {
-    let isMounted = true;
-    setIsImgLoading(true);
-    if (!reciter?.name) {
-      setReciterImg(avatar);
-      setIsImgLoading(false);
-      return;
-    }
-    requestManager
-      .getImage(reciter.id, reciter.name)
-      .then((imageUrl) => {
-        if (isMounted) setReciterImg(imageUrl || avatar);
-      })
-      .catch(() => {
-        if (isMounted) setReciterImg(avatar);
-      })
-      .finally(() => {
-        if (isMounted) setIsImgLoading(false);
-      });
-    return () => {
-      isMounted = false;
+    const handleScroll = () => {
+      // Get current scroll position (equivalent to window.scrollY for the element)
+      const scrollTop = reciterDiv.scrollTop;
+      setIsSticky(scrollTop > 200);
     };
-  }, [reciter?.id, reciter?.name]);
+
+    reciterDiv.addEventListener("scroll", handleScroll);
+    return () => {
+      // Cleanup: remove event listener and clear timeout
+      reciterDiv.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   // Memoize surahUrls for performance
   const surahUrls = useMemo(() => {
@@ -96,16 +123,11 @@ function ListSurahOfReciter() {
           id: `${reciter?.id}`,
           name: reciter?.name,
           moshaf: moshaf?.name,
-          imgUrl: reciterImg,
+          imgUrl: reciterInfo?.img,
         },
       };
     });
-  }, [moshaf, suwarData, reciter, reciterImg]);
-
-  // PlayButton handler (memoized)
-  const handlePlayAll = useCallback(() => {
-    // Implement play all logic if needed
-  }, [surahUrls]);
+  }, [moshaf, suwarData, reciter, reciterInfo?.img]);
 
   // Handle Retry Logic
   if (error) {
@@ -126,7 +148,7 @@ function ListSurahOfReciter() {
   }
 
   return (
-    <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
+    <div className="flex reciter flex-col bg-second-black rounded-lg  w-full min-h-screen ">
       {isLoading || isFetching ? (
         /* Skeleton Loading State */
         <>
@@ -184,22 +206,42 @@ function ListSurahOfReciter() {
                 <MdVerified className="size-7 text-sky-400" />
               </span>{" "}
               Good Reciter
+              {reciterInfo?.country && (
+                <span className="text-sm font-normal flex items-center  text-gray-400 capitalize ml-2">
+                  {reciterInfo?.country}{" "}
+                  <span><IoLocationSharp className="text-pink-600 size-4" /></span>
+                </span>
+              )}
             </span>
             <div className="reciter-name   capitalize text-9xl font-extrabold max-sm:text-5xl text-white mt-5 mb-7 text-wrap overflow-hidden text-ellipsis max-w-[900px] lg:w-fit lg:overflow-visible ">
               {reciter?.name}
             </div>
             <ViewsCount reciter={reciter} />
+            <div className="description mt-3">
+              <p className="text-white text-sm font-medium max-sm:text-sm">
+                {reciterInfo?.description
+                  ? showFullDesc ||
+                    reciterInfo?.description.length <= maxDescLength
+                    ? reciterInfo?.description
+                    : reciterInfo?.description.slice(0, maxDescLength) + "..."
+                  : "No description available"}
+              </p>
+              {reciterInfo?.description &&
+                reciterInfo?.description.length > maxDescLength && (
+                  <button
+                    className="text-sky-400 underline text-xs mt-1"
+                    onClick={() => setShowFullDesc((prev) => !prev)}
+                  >
+                    {showFullDesc ? "Show Less" : "Show More"}
+                  </button>
+                )}
+            </div>
           </div>
           <div className="down   bg-gradient-to-b from-blue-500/30 from-1% to-5%  to-second-black ">
             <div
-              className={`actions flex items-center gap-4 sm:gap-6 py-3 sm:py-4 px-5 ${
-                isSticky && "sticky top-[90px] z-20 backdrop-blur-lg "
-              }`}
+              className={`actions flex items-center gap-4 sm:gap-6 py-3 sm:py-4 px-5 sticky top-[0px] z-20 backdrop-blur-lg  `}
             >
-              <PlayButton
-                onClick={handlePlayAll}
-                surahQueue={surahUrls}
-              />
+              <PlayButton surahQueue={surahUrls} />
               <button className="block py-1 px-3 max-sm:text-sm font-medium sm:py-2 sm:px-5 rounded-full cursor-pointer border-1 border-white text-white">
                 Follow
               </button>
@@ -238,26 +280,24 @@ function ListSurahOfReciter() {
                     </div>
                   </div>
                 ) : (
-                  <div className="info relative w-[80%] max-sm:w-full ">
+                  <div className="info relative w-[80%] max-sm:w-full overflow-hidden ">
                     <div className="bg-black absolute top-0 left-0 w-full h-full z-10 opacity-40"></div>
                     <div
                       className="img w-full h-[700px] max-sm:h-[300px]  rounded-lg overflow-hidden "
                       style={{
-                        backgroundImage: `url(${reciterImg})`,
+                        backgroundImage: `url(${reciterInfo?.img})`,
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
                         backgroundSize: "cover",
                       }}
                     ></div>
-                    <div className="txt absolute left-5 bottom-5 z-20 p-5">
-                      <ViewsCount reciter={reciter} />
-                      <div className="text-white capitalize text-lg max-sm:text-xs ">
-                        {discription}
-                        Lorem ipsum dolor sit, amet consectetur adipisicing
-                        elit. Sapiente optio voluptatem voluptas veritatis
-                        excepturi possimus beatae voluptatibus cumque ipsam,
-                        laboriosam corrupti dicta eos! Veniam repellat dicta
-                        impedit dolorum, porro harum.
+                    <div className="txt  absolute left-5 bottom-5 z-20 p-5">
+                      <div
+                        title={reciterInfo?.description}
+                        className="text-white capitalize max-h- text-lg max-sm:text-xs "
+                      >
+                        {reciterInfo?.description.slice(0, maxDescLength) +
+                          "..."}
                       </div>
                     </div>
                   </div>

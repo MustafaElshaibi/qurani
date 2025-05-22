@@ -6,7 +6,7 @@ import {
   useGetAllSurahDetailsQuery,
   useGetSvgSurahQuery,
 } from "../rtk/Services/QuranApi";
-import {  useEffect,  useMemo,  useState } from "react";
+import {  useEffect,  useState } from "react";
 import { ErrorPage } from "./Error";
 import {  useSelector } from "react-redux";
 import { CiMusicNote1 } from "react-icons/ci";
@@ -95,26 +95,27 @@ useEffect(() => {
       // Fetch images after initial render
       initialData.forEach(async (item) => {
         try {
-          const imageUrl = await requestManager.getImage(
+          const reciter = await requestManager.getReciterInfo(
             item.reciter.id,
             item.reciter.name,
             { signal: abortController.signal }
           );
 
-          if (isMounted && imageUrl) {
+          if (isMounted && reciter?.img) {
             setReciterObj(prev => prev.map(prevItem => 
               prevItem.id === item.id
                 ? { 
                     ...prevItem, 
                     reciter: { 
                       ...prevItem.reciter, 
-                      imgUrl: imageUrl 
+                      imgUrl: reciter?.img || avatar,  
                     } 
                   }
                 : prevItem
             ));
           }
         } catch (error) {
+          console.log(error)
           if (!abortController.signal.aborted) {
             console.warn("Image fetch failed for:", item.reciter.name);
           }
@@ -229,6 +230,7 @@ if (error) {
                                       surahData={surah}
                                       audioQueue={reciterObj}
                                       onSurah={true}
+                                      requestManager={requestManager}
                                     />
                 ))}
               </div>

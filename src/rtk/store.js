@@ -6,6 +6,8 @@ import authReducer from './Reducers/AuthReducer'
 import librariesSlice from './Reducers/LibraryReducer';
 import langSlice from './Reducers/langSlice';
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { db } from "../services/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export const store = configureStore({
   reducer: {
@@ -28,11 +30,56 @@ export const store = configureStore({
     }).concat(quranApi.middleware),
 })
 
-// Throttled localStorage persistence
+let prevUser = null;
+let prevPlaybackPositions = null;
+let prevLang = null;
+
 const persistStore = () => {
-  const positions = store.getState().player.playbackPositions;
-  localStorage.setItem('playbackPositions', JSON.stringify(positions));
+  const state = store.getState();
+  const currentUser = state.auth.user;
+  const currentPlaybackPositions = state.player.playbackPositions;
+  const currentLang = state.lang;
+  // Check if any relevant state has changed
+  const userChanged = currentUser !== prevUser;
+  const positionsChanged = currentPlaybackPositions !== prevPlaybackPositions;
+  const langChanged = currentLang !== prevLang;
+  // Skip if no relevant changes
+  if (!userChanged && !positionsChanged && !langChanged) {
+    return;
+  }
+  console.log("one")
+
+  // Save playback positions to localStorage
+  localStorage.setItem('playbackPositions', JSON.stringify(currentPlaybackPositions));
+
+  // Save to Firestore if user is logged in
+  if (currentUser?.uid) {
+    const userDocRef = doc(db, "users", String(currentUser.uid));
+    setDoc(
+      userDocRef,
+      {
+        user: {
+          uid: currentUser.uid,
+          displayName: currentUser.displayName || "",
+          email: currentUser.email || "",
+          photoURL: currentUser.photoURL || "",
+        },
+        playbackPositions: currentPlaybackPositions,
+        lang: currentLang,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch((err) => {
+      console.error("Failed to save user data to Firestore:", err);
+    });
+  }
+
+  // Update previous values to current
+  prevUser = currentUser;
+  prevPlaybackPositions = currentPlaybackPositions;
+  prevLang = currentLang;
 };
+
 
 store.subscribe(persistStore);
 setupListeners(store.dispatch);

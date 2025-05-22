@@ -27,8 +27,12 @@ function ViewsCount({reciter}) {
         } else {
           // Create document with required fields
           await setDoc(docRef, {
+            reciterId: reciterId,
             name: reciter?.name || "Unknown Reciter",
+            img: null,
+            libraries: [],
             views: 0,
+            timestamp: new Date().toISOString()
           });
           setViews(0);
         }

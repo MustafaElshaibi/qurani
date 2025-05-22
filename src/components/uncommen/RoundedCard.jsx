@@ -22,9 +22,10 @@ export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
       if (!reciter?.name) return;
       
       try {
-        const imageUrl = await requestManager.getImage(reciter.id, reciter.name);
-        if (isMounted && imageUrl) {
-          setImg(imageUrl);
+        const reciterObj = await requestManager.getReciterInfo(reciter.id, reciter.name);
+        const { img  } = reciterObj;
+        if (isMounted && img) {
+          setImg(img);
         }
       } catch (error) {
         if (isMounted) setImg(avatar);

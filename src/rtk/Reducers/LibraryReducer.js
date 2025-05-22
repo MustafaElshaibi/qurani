@@ -1,6 +1,7 @@
 // librariesSlice.js
-import { createSlice } from "@reduxjs/toolkit";
-
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { doc as firestoreDoc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../services/firebase";
 
 // System libraries configuration (always first)
 const SYSTEM_LIBRARIES = [
@@ -13,12 +14,11 @@ const SYSTEM_LIBRARIES = [
   },
 ];
 
-// Helper function for localStorage persistence
-const persistState = (state) => {
+// Helper function for localStorage and Firestore persistence
+const persistState = async (state) => {
   try {
     const toPersist = {
       activeLibraryId: state.activeLibraryId,
-      // Save user libraries + favorites items
       userLibraries: state.libraries
         .filter((l) => l.type === "user")
         .map((l) => ({
@@ -30,7 +30,17 @@ const persistState = (state) => {
       favoritesItems:
         state.libraries.find((l) => l.id === "favorites")?.items || [],
     };
-    localStorage.setItem("musicLib", JSON.stringify(toPersist));
+    if (auth.currentUser?.uid) {
+      const userDocRef = firestoreDoc(
+        db,
+        "users",
+        String(auth.currentUser.uid)
+      );
+      setDoc(userDocRef, { libraries: toPersist }, { merge: true });
+      // Optionally, you can await setDoc if you want to ensure it's done before proceeding
+    }
+    // Save to localStorage
+    localStorage.setItem("libraries", JSON.stringify(toPersist));
   } catch (error) {
     console.error("Failed to persist state:", error);
   }
@@ -39,18 +49,15 @@ const persistState = (state) => {
 // Initial state loader
 const loadInitialState = () => {
   try {
-    const saved = localStorage.getItem("musicLib");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-
-      // Merge system libraries with persisted favorites items
+    // check if data is already in localStorage
+    const localStorageData = localStorage.getItem("libraries");
+    if (localStorageData) {
+      const parsedData = JSON.parse(localStorageData);
       const systemLibraries = SYSTEM_LIBRARIES.map((lib) => ({
         ...lib,
-        items: parsed.favoritesItems || [],
+        items: parsedData.favoritesItems || [],
       }));
-
-      // Reconstruct user libraries
-      const userLibraries = (parsed.userLibraries || []).map((lib) => ({
+      const userLibrarie = (parsedData.userLibraries || []).map((lib) => ({
         ...lib,
         type: "user",
       }));
@@ -58,9 +65,9 @@ const loadInitialState = () => {
       return {
         libraries: [
           ...systemLibraries, // Favorites first
-          ...userLibraries, // User libraries after
+          ...userLibrarie, // User libraries after
         ],
-        activeLibraryId: parsed.activeLibraryId || "favorites",
+        activeLibraryId: parsedData.activeLibraryId || "favorites",
       };
     }
   } catch (error) {
@@ -73,11 +80,9 @@ const loadInitialState = () => {
   };
 };
 
-const initialState = loadInitialState();
-
 const librariesSlice = createSlice({
   name: "libraries",
-  initialState,
+  initialState: loadInitialState(),
   reducers: {
     // Toggle song in favorites (fixed implementation)
     toggleFavorite: (state, action) => {
@@ -106,7 +111,7 @@ const librariesSlice = createSlice({
           state.libraries.splice(insertIndex, 0, action.payload);
         }
         state.activeLibraryId = action.payload.id;
-       persistState(state);
+        persistState(state);
       },
       prepare: (name) => ({
         payload: {
@@ -160,7 +165,7 @@ const librariesSlice = createSlice({
       userLibs.splice(action.payload.endIndex, 0, removed);
 
       state.libraries = [...systemLibs, ...userLibs];
-     persistState(state);
+      persistState(state);
     },
 
     // Add song to specific library
@@ -179,11 +184,51 @@ const librariesSlice = createSlice({
       const library = state.libraries.find((l) => l.id === libraryId);
       if (library) {
         library.items = library.items.filter((s) => s.id !== songId);
-       persistState(state);
+        persistState(state);
       }
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(loadLibrariesFromFirestore.fulfilled, (state, action) => {
+      state.libraries = action.payload.libraries;
+      state.activeLibraryId = action.payload.activeLibraryId;
+    });
+  },
 });
+
+// Thunk to load libraries from Firestore
+export const loadLibrariesFromFirestore = createAsyncThunk(
+  "libraries/loadFromFirestore",
+  async (uid, { dispatch }) => {
+    // If not, fetch from Firestore
+    if (auth.currentUser?.uid !== uid) return;
+    const userDocRef = firestoreDoc(db, "users", String(uid));
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const userLibrariesData = userData.libraries || {};
+      console.log(userLibrariesData);
+      const systemLibraries = SYSTEM_LIBRARIES.map((lib) => ({
+        ...lib,
+        items: userLibrariesData.favoritesItems || [],
+      }));
+      const userLibrarie = (userLibrariesData.userLibraries || []).map(
+        (lib) => ({
+          ...lib,
+          type: "user",
+        })
+      );
+      return {
+        libraries: [...systemLibraries, ...userLibrarie],
+        activeLibraryId: userLibrariesData.activeLibraryId || "favorites",
+      };
+    }
+    return {
+      libraries: [...SYSTEM_LIBRARIES],
+      activeLibraryId: "favorites",
+    };
+  }
+);
 
 // Selectors
 export const selectAllLibraries = (state) => state.libraries.libraries;
@@ -196,7 +241,7 @@ export const selectIsFavorite = (state, songId) => {
   const favorites = state.libraries.libraries.find((l) => l.id === "favorites");
   return favorites?.items.some((s) => s.id === songId) || false;
 };
-export const selectIsInPlayList = (state,libId, songId) => {
+export const selectIsInPlayList = (state, libId, songId) => {
   const favorites = state.libraries.libraries.find((l) => l.id === libId);
   return favorites?.items.some((s) => s.id === songId) || false;
 };

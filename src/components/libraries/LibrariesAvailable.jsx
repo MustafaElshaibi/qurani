@@ -59,7 +59,7 @@ const LibraryAvailable = memo(({ surahData, onClick }) => {
   }, [dispatch, surahData]);
 
   return (
-    <ul className="absolute w-fit px-3 py-2 rounded-lg bottom-5 right-3 bg-search-dark text-white">
+    <ul className="absolute w-fit z-30 px-3 py-2 rounded-lg bottom-5 right-3 bg-search-dark text-white">
       {libs.map(library => (
         <LibraryItem 
           key={library.id}

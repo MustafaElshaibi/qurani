@@ -1,4 +1,3 @@
-
 import { nextTrack, setCurrentTime, setDuration, setPlaybackPositions } from "../rtk/Reducers/PlayerReducer";
 
 
@@ -50,6 +49,10 @@ class AudioService {
         this.retryCount = 0;
       }
     };
+
+    // Add support for more audio types
+    this.audio.type = "audio/mpeg, audio/mp3, audio/ogg, audio/wav, audio/aac, audio/webm";
+    this.preloadAudio.type = "audio/mpeg, audio/mp3, audio/ogg, audio/wav, audio/aac, audio/webm";
   }
 
   initialize(store) {

@@ -12,6 +12,7 @@ const Player = lazy(() => import("./components/commen/Player"));
 import Sidebar from "./components/commen/Sidebar";
 import IsAuth from "./auth/IsAuth";
 import ProtectAuthPages from "./auth/ProtectAuthPages";
+import { auth } from "./services/firebase";
 const Home = lazy(() => import("./pages/Home"));
 const ListSurahOfReciter = lazy(() => import("./pages/ListSurahOfReciter"));
 const Login = lazy(() => import("./pages/Login"));
@@ -33,6 +34,7 @@ function App() {
 
   useEffect(() => {
     dispatch(listenToAuthChanges());
+    
   }, [dispatch]);
 
   return (
@@ -47,7 +49,7 @@ function App() {
             element={
               <>
                 <Header />
-                <div className="hero flex gap-1.5 mx-1 my-1  h-screen"> 
+                <div className="hero flex gap-1.5 mx-1 my-1 top-[100px]  h-screen"> 
                   <Sidebar />
                   <div className="main-display w-full min-h-screen overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:appearance-none">
                     <Suspense

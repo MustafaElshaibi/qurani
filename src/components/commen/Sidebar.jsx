@@ -35,7 +35,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="sidebar bg-second-black overflow-y-auto overflow-x-hidden rounded-lg p-2 sm:p-4 sticky top-[100px] max-h-[calc(100vh-100px)] sm:w-[300px] lg:w-[400px] xl:w-[500px] w-[70px] transition-all duration-300 [&::-webkit-scrollbar]:appearance-none">
+      <div className="sidebar bg-second-black overflow-y-auto overflow-x-hidden rounded-lg p-2 sm:p-4  sticky top-[100px] max-h-[calc(100vh-100px)] sm:w-[300px] lg:w-[400px] xl:w-[500px] w-[70px] transition-all duration-300 [&::-webkit-scrollbar]:appearance-none [&::-webkit-scrollbar]:w-0">
         <div className="flex flex-col gap-4">
           <RxHamburgerMenu
             onClick={() => setShowOnMobile(!showOnMobile)}

@@ -11,6 +11,8 @@ import {  Link, useNavigate } from "react-router-dom";
 import HeartFavorite from "./HeartFavorite";
 import { TbCirclePlus } from "react-icons/tb";
 import LibraryAvailable from "../libraries/LibrariesAvailable";
+import DownloadSurah from "./DownloadSurah";
+import { BsThreeDots } from "react-icons/bs";
 
 
 const cookies = new Cookies();
@@ -23,6 +25,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showLib, setShowLib] = useState(false);
+  const [showListMobile, setShowListMobile] = useState(false);
   const token = cookies.get('auth-token');
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -75,7 +78,11 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
       />
     <div
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false)
+        setShowLib(false);
+        setShowListMobile(false)
+      }}
       className="surah flex items-center justify-between gap-1 sm:gap-5 px-5 max-sm:px-1 py-2 transition-colors duration-300 hover:bg-hover-black rounded-lg"
     >
       <div className="flex items-center flex-1 transition-all duration-300 ">
@@ -180,16 +187,45 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
       </div>
       <div className=" relative">
       {
-        showLib && isHovered && 
+        (showLib && isHovered)  && 
         (
           <LibraryAvailable surahData={surahData} onClick={()=> setShowLib(!showLib)} />
         )
       }
-      <TbCirclePlus onClick={()=> setShowLib(!showLib)} className={`text-gray   ${isHovered ? 'sm:block' : 'hidden'} cursor-pointer size-5`} />
+      <TbCirclePlus onClick={()=> setShowLib(!showLib)} className={`text-white mx-1   ${isHovered ? 'sm:block' : 'hidden'} cursor-pointer size-5`} />
       </div>
+
+
+
+      <DownloadSurah surah={surahData} />
+
        <HeartFavorite song={surahData} />
+      <div className="relative sm:hidden">
+        <BsThreeDots onClick={()=> setShowListMobile(!showListMobile)} className="text-white size-5 cursor-pointer sm:hidden"/>
+{/* list on mobile for download fav ..etc  */}
+      {
+        showListMobile && (
+           <div className="absolute bottom-5 right-3 w-37 z-30 bg-search-dark rounded-lg shadow-sm py-2 transition-all duration-300 origin-top">
+          <ul className="text-white">
+            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Download</span> <DownloadSurah className={'block!'} surah={surahData} /></li>
+            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Like</span> <HeartFavorite className={'block!'} song={surahData} /></li>
+            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer">  <div className="text-gray w-[50px] flex items-center justify-center">
+        {surahData?.makkia ? (
+          <LiaKaabaSolid className="size-6" />
+        ) : (
+          <FaMosque className="size-4" />
+        )}
+      </div></li>
+            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><div className="text-gray font-bold">
+        {isCurrent ? formatTime(duration) : surahData?.duration || "--:--"}
+      </div></li>
+          </ul>
+        </div>
+        )
+      }
+      </div>
+
       <div className="text-gray w-[50px] flex items-center justify-center max-sm:hidden">
-     
         {surahData?.makkia ? (
           <LiaKaabaSolid className="size-6" />
         ) : (
@@ -200,6 +236,10 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
       <div className="text-gray font-bold max-sm:hidden">
         {isCurrent ? formatTime(duration) : surahData?.duration || "--:--"}
       </div>
+
+
+
+      
     </div>
    </>
   );

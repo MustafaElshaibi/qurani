@@ -177,7 +177,7 @@ const Player = () => {
                     disabled={history.length === 0 && currentTime < 3}
                     onClick={() => dispatch(previousTrack())}
                   >
-                    <TbPlayerSkipBackFilled className="size-5 cursor-pointer text-gray-100" />
+                    <TbPlayerSkipBackFilled className={`size-5 cursor-pointer ${history.length === 0 ? 'text-gray' : 'text-gray-100'} `} />
                   </button>
                   <button
                     onClick={handlePlayPause}
@@ -193,7 +193,7 @@ const Player = () => {
                     disabled={queue.length === 0 && repeat === "none"}
                     onClick={() => dispatch(nextTrack())}
                   >
-                    <TbPlayerSkipForwardFilled className="size-5 cursor-pointer text-gray-100" />
+                    <TbPlayerSkipForwardFilled className={`size-5 cursor-pointer ${queue.length === 0 && repeat === "none" ? 'text-gray' : 'text-gray-100'} `} />
                   </button>
                   <button onClick={() => dispatch(setRepeat())}>
                     {repeat === "none" || repeat === "playlist" ? (
