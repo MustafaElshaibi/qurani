@@ -82,7 +82,6 @@ function ListSurahOfReciter() {
   // Set document title
   useEffect(() => {
     if (reciter?.name) {
-      document.title = `${reciter?.name} - Quran App`;
       loadReciterInfo(reciter?.name);
     }
   }, [reciter?.name, loadReciterInfo]);
