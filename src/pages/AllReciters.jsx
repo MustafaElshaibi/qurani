@@ -1,4 +1,5 @@
-import {  useEffect,  useState } from "react";
+import { Helmet } from "react-helmet-async";
+import {  useEffect,  useMemo,  useState } from "react";
 import { useGetAllRecitersQuery } from "../rtk/Services/QuranApi";
 import { RoundedCard } from "../components/uncommen/RoundedCard";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
@@ -12,10 +13,26 @@ import { requestManager } from "../utility/requestManager";
 const AllReciters = () => {
   const lang = useSelector((state)=> state.lang);
   const { data, loading, error, refetch, isFetching } = useGetAllRecitersQuery(lang);
-  const loader = loading || !data;
-  const [reciters, setReciters] = useState([]);
+  const loader = loading || isFetching;
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(20);
+   const reciters = useMemo(() => {
+    try {
+      if (data?.reciters) {
+        // Create a new array to avoid mutating the original data
+        const initialReciters = [...data.reciters];
+        initialReciters.sort((a, b) =>
+          a.name?.toLowerCase().localeCompare(b.name?.toLowerCase())
+        );
+        return initialReciters;
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      return [];
+    }
+    return [];
+  }, [data]);
+
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentReciters = reciters.slice(indexOfFirstPost, indexOfLastPost);
@@ -36,7 +53,7 @@ const AllReciters = () => {
 
   const PostReciters = ({reciters})=> {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
             {reciters.map((reciter, i) => (
               <RoundedCard 
                 key={reciter?.id || i} 
@@ -52,23 +69,15 @@ const AllReciters = () => {
 
 
 
-  useEffect(() => {
-    try {
-      if (data?.reciters) {
-        // Create a new array to avoid mutating the original data
-        const initialReciters = [...data.reciters];
-        initialReciters.sort((a, b) =>
-          a.name?.toLowerCase().localeCompare(b.name?.toLowerCase())
-        );
-        setReciters(initialReciters);
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-    }
-  }, [data]);
 
 
 
+ const result = data?.reciters?.map((sura) => {
+      console.log(`<url>
+    <loc>https://qurani-opal.vercel.app/reciter?q=${sura?.id}</loc>
+    <priority>0.8</priority>
+  </url>`);
+      });
 
   if (error) {
     return (
@@ -89,6 +98,29 @@ const AllReciters = () => {
 
 
   return (
+    <>
+      <Helmet>
+        <title>{lang === "eng" ? "All Reciters | Qurani" : "جميع القراء | قرآني"}</title>
+        <meta
+          name="description"
+          content={
+            lang === "eng"
+              ? "Discover all Quran reciters. Listen to your favorite Qari and explore their recitations on Qurani."
+              : "اكتشف جميع قراء القرآن الكريم. استمع إلى قارئك المفضل واستكشف تلاواتهم على قرآني."
+          }
+        />
+        <link rel="canonical" href="https://qurani-opal.vercel.app/reciters" />
+        <meta name="robots" content="index, follow" />
+        {/* Open Graph */}
+        <meta property="og:title" content={lang === "eng" ? "All Reciters | Qurani" : "جميع القراء | قرآني"} />
+        <meta property="og:description" content={
+          lang === "eng"
+            ? "Discover all Quran reciters. Listen to your favorite Qari and explore their recitations on Qurani."
+            : "اكتشف جميع قراء القرآن الكريم. استمع إلى قارئك المفضل واستكشف تلاواتهم على قرآني."
+        } />
+        <meta property="og:url" content="https://qurani-opal.vercel.app/reciters" />
+        <meta property="og:image" content="/quranLogo.svg" />
+      </Helmet>
     <div className="w-full bg-[#121212] rounded-lg  space-y-8 min-h-screen">
       {
         loader ? 
@@ -102,7 +134,7 @@ const AllReciters = () => {
         </div>
         
         {/* Reciters Grid Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
           {[...Array(10)].map((_, i) => (
             <div key={i} className="space-y-3">
               {/* Image placeholder */}
@@ -150,6 +182,7 @@ const AllReciters = () => {
       }
 
     </div>
+    </>
   );
 };
 

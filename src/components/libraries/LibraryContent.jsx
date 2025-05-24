@@ -46,7 +46,7 @@ const LibraryContent = () => {
               </div>
             ) : (
               items?.map((item, index) => (
-                <SurahListItem key={index} index={index + 1} surahData={item} audioQueue={items} onFavorite={true} />
+                <SurahListItem key={index} index={index + 1} surahData={item} audioQueue={items} onFavorite={true} onSurah={true} />
               ))
             )}
           </div>

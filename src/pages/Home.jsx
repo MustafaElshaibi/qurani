@@ -1,12 +1,12 @@
-import {  useEffect,  useState } from "react";
+import {  useEffect,  useMemo,  useState } from "react";
 import { useGetAllRecitersQuery, useGetAllSurahDetailsQuery } from "../rtk/Services/QuranApi";
 import { RoundedCard } from "../components/uncommen/RoundedCard";
 import  SquarCard  from "../components/uncommen/SquarCard";
 import { FiChevronRight } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { setLanguage } from "../rtk/Reducers/langSlice";
 import PageLoader from "../components/uncommen/PageLoader";
 import { requestManager } from "../utility/requestManager";
+import { Helmet } from "react-helmet-async";
 
 
 
@@ -15,39 +15,25 @@ const Home = () => {
   const lang = useSelector((state) => state.lang);
   const { data, loading, error, isFetching , refetch } = useGetAllRecitersQuery(lang);
   const {data: suwarData, isFetching: fetchSuwar, isLoading: isLoadSuwar } = useGetAllSurahDetailsQuery(lang);
-  const loader = loading || !data;
-  const [reciters, setReciters] = useState([]);
-  const dispatch = useDispatch();
-    const [suwar, setSuwar] = useState([]);
+  const loader = loading || isLoadSuwar;
   
     
-    useEffect(()=> {
+   const suwar = useMemo(()=> {
       if(suwarData?.suwar)
       {
-        setSuwar(suwarData?.suwar);
+        return suwarData?.suwar;
       }
+      return [];
     }, [suwarData])
 
 
-
-  // Handle cross-tab synchronization
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'lang') {
-        dispatch(setLanguage(e.newValue || 'eng'));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [dispatch]);
-
   // set initial reciters when data is available
-  useEffect(() => {
+  const reciters = useMemo(() => {
     if (data?.reciters) {
       const initialReciters = data.reciters.slice(0, 6);
-      setReciters(initialReciters);
+      return initialReciters;
     }
+    return [];
   }, [data]);
 
   // Handle Retry logic
@@ -68,6 +54,54 @@ const Home = () => {
 
 
   return (
+   <>
+   <Helmet>
+    <title>{lang === "eng" ? "Qurani | a Holy Quran Platform" : "قرآني | منصة قرأنية متكاملة"}</title>
+    <meta
+          name="description"
+          content={
+            lang === "eng"
+              ? "Qurani is a beautifully designed, modern web application for reading, listening, and learning the Holy Quran. Listen to popular reciters, explore chapters, and more."
+              : "قرآني هو تطبيق ويب حديث وجميل لقراءة وسماع وتعلم القرآن الكريم. استمع لأشهر القراء، استكشف السور، احفظ الآيات والمزيد."
+          }
+        />
+        <meta
+          name="keywords"
+          content={
+            lang === "eng"
+              ? "Quran, Qurani, Holy Quran, Listen Quran, Read Quran, Surah, Reciters, Islamic, Islam, Quran Audio, Quran App, Elshaibi"
+              : "قرآن, قرآني, استماع القرآن, قراءة القرآن, سور, قراء, إسلام, تطبيق القرآن, Elshaibi"
+          }
+        />
+        <meta name="author" content="Elshaibi" />
+        <meta name="robots" content="index, follow" />
+        {/* Open Graph tags */}
+        <meta property="og:title" content={lang === "eng" ? "Qurani | a Holy Quran Platform" : "قرآني | منصة قرأنية متكاملة"} />
+        <meta
+          property="og:description"
+          content={
+            lang === "eng"
+              ? "Read, listen, and learn the Holy Quran online. Discover popular reciters and chapters on Qurani."
+              : "اقرأ واستمع وتعلم القرآن الكريم عبر الإنترنت. اكتشف أشهر القراء والسور على قرآني."
+          }
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://qurani-opal.vercel.app/" />
+        <meta property="og:image" content="/quranLogo.svg" />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={lang === "eng" ? "Qurani | a Holy Quran Platform" : "قرآني | منصة قرأنية متكاملة"} />
+        <meta
+          name="twitter:description"
+          content={
+            lang === "eng"
+              ? "Read, listen, and learn the Holy Quran online. Discover popular reciters and chapters on Qurani."
+              : "اقرأ واستمع وتعلم القرآن الكريم عبر الإنترنت. اكتشف أشهر القراء والسور على قرآني."
+          }
+        />
+        <meta name="twitter:image" content="/quranLogo.svg" />
+        <link rel="canonical" href="https://qurani-opal.vercel.app/" />
+   </Helmet>
     <div className="w-full bg-[#121212] rounded-lg p-6 space-y-8 min-h-screen">
       {loader || isFetching  ? (
         <>
@@ -77,7 +111,7 @@ const Home = () => {
               <div className="h-8 bg-gray-800 rounded w-48 animate-pulse"></div>
               <div className="h-6 bg-gray-800 rounded w-20 animate-pulse"></div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-6">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="rounded-full bg-gray-800 aspect-square w-full"></div>
@@ -122,7 +156,7 @@ const Home = () => {
                 See all <FiChevronRight className="text-lg " />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6   gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6   gap-6">
               {reciters.map((reciter, i) => (
                 <RoundedCard
                   key={reciter?.id || i}
@@ -153,6 +187,7 @@ const Home = () => {
         </>
       )}
     </div>
+   </>
   );
 };
 

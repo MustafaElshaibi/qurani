@@ -1,30 +1,24 @@
 // MainDisplay.tsx
-import {  useEffect,  useState } from "react";
-import { useGetAllRecitersQuery, useGetAllSurahDetailsQuery } from "../rtk/Services/QuranApi";
+import { Helmet } from "react-helmet-async";
+import {   useMemo } from "react";
+import { useGetAllSurahDetailsQuery } from "../rtk/Services/QuranApi";
 import  SquarCard  from "../components/uncommen/SquarCard";
-import { FiChevronRight } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
-import { setLanguage } from "../rtk/Reducers/langSlice";
-import { ErrorPage } from "./Error";
+import { useSelector } from "react-redux";
 import PageLoader from "../components/uncommen/PageLoader";
 
 
 const AllSurah = () => {
   const lang = useSelector((state) => state.lang);
-  const { data, loading, error, isFetching , refetch } = useGetAllRecitersQuery(lang);
-  const {data: suwarData, isFetching: fetchSuwar, isLoading: isLoadSuwar } = useGetAllSurahDetailsQuery(lang);
-  const loader = loading || !data;
-  const dispatch = useDispatch();
-    const [suwar, setSuwar] = useState([]);
+  const {data: suwarData, isFetching, isLoading , error, refetch} = useGetAllSurahDetailsQuery(lang);
+  const loader = isLoading || isFetching ;
   
-    useEffect(()=> {
+    const suwar = useMemo(()=> {
       if(suwarData?.suwar)
       {
-        setSuwar(suwarData?.suwar);
+        return suwarData?.suwar;
       }
+      return [];
     }, [suwarData])
-
-
 
  if (error) {
      return (
@@ -45,7 +39,30 @@ const AllSurah = () => {
 
 
   return (
-    <div className="w-full bg-[#121212] rounded-lg p-6 space-y-8 min-h-screen">
+    <>
+      <Helmet>
+        <title>{lang === "eng" ? "All Chapters | Qurani" : "جميع السور | قرآني"}</title>
+        <meta
+          name="description"
+          content={
+            lang === "eng"
+              ? "Browse all chapters (Surahs) of the Holy Quran. Listen, read, and learn with Qurani."
+              : "تصفح جميع سور القرآن الكريم. استمع واقرأ وتعلم مع قرآني."
+          }
+        />
+        <link rel="canonical" href="https://qurani-opal.vercel.app/chapters" />
+        <meta name="robots" content="index, follow" />
+        {/* Open Graph */}
+        <meta property="og:title" content={lang === "eng" ? "All Surahs | Qurani" : "جميع السور | قرآني"} />
+        <meta property="og:description" content={
+          lang === "eng"
+            ? "Browse all chapters (Surahs) of the Holy Quran. Listen, read, and learn with Qurani."
+            : "تصفح جميع سور القرآن الكريم. استمع واقرأ وتعلم مع قرآني."
+        } />
+        <meta property="og:url" content="https://qurani-opal.vercel.app/chapters" />
+        <meta property="og:image" content="/quranLogo.svg" />
+      </Helmet>
+      <div className="w-full bg-[#121212] rounded-lg p-6 space-y-8 min-h-screen">
       {loader || isFetching  ? (
         <>
 
@@ -80,13 +97,14 @@ const AllSurah = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {suwar.map((surah , i) => (
-                <SquarCard key={i} isFetching={fetchSuwar} isLoading={isLoadSuwar} surah={surah} />
+                <SquarCard key={i} isFetching={isFetching} isLoading={isLoading} surah={surah} />
               ))}
             </div>
           </section>
         </>
       )}
     </div>
+    </>
   );
 };
 

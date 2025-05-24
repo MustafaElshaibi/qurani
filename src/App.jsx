@@ -12,7 +12,6 @@ const Player = lazy(() => import("./components/commen/Player"));
 import Sidebar from "./components/commen/Sidebar";
 import IsAuth from "./auth/IsAuth";
 import ProtectAuthPages from "./auth/ProtectAuthPages";
-import { auth } from "./services/firebase";
 const Home = lazy(() => import("./pages/Home"));
 const ListSurahOfReciter = lazy(() => import("./pages/ListSurahOfReciter"));
 const Login = lazy(() => import("./pages/Login"));
@@ -80,7 +79,7 @@ function App() {
             <Route path="/library/:libraryId" element={<LibraryContent />} />
             <Route path="/search" element={<ListSurahOfReciter />} />
             <Route path="/surah" element={<SurahInfoPage />} />
-            <Route path="/all-surah" element={<AllSurah />} />
+            <Route path="/chapters" element={<AllSurah />} />
             <Route path="/live" element={<YouTubeLive />} />
           </Route>
 

@@ -132,7 +132,7 @@ const Sidebar = () => {
                 </span>
               </NavLink>
               <NavLink
-                to={"/all-surah"}
+                to={"/chapters"}
                 className={({ isActive }) =>
                   `flex items-center w-full gap-1 sm:gap-3 md:gap-3 max-sm:justify-center 
      sm:py-2 sm:px-3 hover:bg-hover-black cursor-pointer 
@@ -267,7 +267,7 @@ const Sidebar = () => {
                 </span>
               </NavLink>
               <NavLink
-                to={"/all-surah"}
+                to={"/chapters"}
                 onClick={()=> setShowOnMobile(false)}
                 className={({ isActive }) =>
                   `flex items-center w-full gap-2 sm:gap-3  

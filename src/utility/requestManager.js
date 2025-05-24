@@ -282,7 +282,7 @@ const createRequestManager = () => {
   let isProcessing = false;
   const API_KEY = import.meta.env.VITE_NEXT_GOOGLE_SEARCH_API_KEY;
   const CX = "2495ccf136d074c04";
-  const RATE_LIMIT = 1500;
+  const RATE_LIMIT = 2000;
   const CACHE_TTL = 2592000000; // 30 days in ms
 
   // Memory cache layer

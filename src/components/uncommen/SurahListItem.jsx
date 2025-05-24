@@ -128,13 +128,13 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
             ) : isCurrent && isPlaying ? (
               <FaPause className={` size-4 ${isCurrent ? isPlaying  ? (onFavorite ? 'text-pink-600' : 'text-green') : 'text-white': "text-gray"}`} />
             ) : (
-              <span className="text-gray font-bold text-lg">{index}</span>
+              <span className="text-gray font-bold text-sm sm:text-lg">{index}</span>
             )}
           </button>
         </div>
 
         <div className="flex items-center ml-1 sm:ml-4 ">
-          <div className={`w-[60px] h-[60px] ${lang === 'eng' ? 'mr-4': 'ml-4'} rounded-lg bg-gray-800 overflow-hidden`}>
+          <div className={`w-[50px] h-[50px] sm:w-[60px] sm:h-[60px] ${lang === 'eng' ? 'mr-4': 'ml-4'} rounded-lg bg-gray-800 overflow-hidden`}>
             {/* Replace with actual image */}
             {
               onSurah && surahData?.reciter?.imgUrl ? (
@@ -151,12 +151,12 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
               )
             }
           </div>
-         <div className="txt">
+         <div className="txt overflow-hidden flex-1">
          {
           onSurah ? 
           (
             <div
-            className={`text-ellipsis overflow-hidden sm:text-xl ${
+            className={`text-ellipsis overflow-hidden text-sm sm:text-xl text-nowrap max-sm:max-w-23 ${
               isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ): "text-heading"
             }`}
           >
@@ -167,9 +167,11 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
           (
             <Link
             to={`/surah?q=${surahData?.surahId}`} 
-            className={`text-ellipsis overflow-hidden sm:text-xl ${
+            className={`text-ellipsis overflow-hidden text-sm sm:text-xl text-nowrap max-sm:max-w-25  ${
               isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ): "text-heading"
             }`}
+            title={surahData?.name}
+
           >
             { surahData?.name || "......."}
           </Link>
@@ -177,8 +179,8 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
          }
           {
           
-            onFavorite || onSurah && (
-              <div className={`reciter-name text-ellipsis overflow-hidden text-xs ${isCurrent ? (onSurah ? 'text-green' : 'text-pink-600') : 'text-white'} `}> {onSurah ? surahData?.name : surahData?.reciter?.name} </div>
+            (onFavorite || onSurah) && (
+              <div className={`reciter-name text-ellipsis overflow-hidden text-[11px] sm:text-xs ${isCurrent ? (onSurah && !onFavorite  ? 'text-green' : 'text-pink-600') : 'text-white'} `}> {onSurah ? surahData?.name : surahData?.reciter?.name} </div>
             )
           }
          </div>
@@ -192,7 +194,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
           <LibraryAvailable surahData={surahData} onClick={()=> setShowLib(!showLib)} />
         )
       }
-      <TbCirclePlus onClick={()=> setShowLib(!showLib)} className={`text-white mx-1   ${isHovered ? 'sm:block' : 'hidden'} cursor-pointer size-5`} />
+      <TbCirclePlus onClick={()=> setShowLib(!showLib)} className={`text-white  sm:mx-1   ${isHovered ? 'block' : 'block sm:hidden'} cursor-pointer size-5`} />
       </div>
 
 
@@ -207,16 +209,16 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
         showListMobile && (
            <div className="absolute bottom-5 right-3 w-37 z-30 bg-search-dark rounded-lg shadow-sm py-2 transition-all duration-300 origin-top">
           <ul className="text-white">
-            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Download</span> <DownloadSurah className={'block!'} surah={surahData} /></li>
-            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Like</span> <HeartFavorite className={'block!'} song={surahData} /></li>
-            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer">  <div className="text-gray w-[50px] flex items-center justify-center">
+            <li onClick={()=> setShowListMobile(false)} className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Download</span> <DownloadSurah className={'block!'} surah={surahData} /></li>
+            <li onClick={()=> setShowListMobile(false)} className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Like</span> <HeartFavorite className={'block!'} song={surahData} /></li>
+            <li onClick={()=> setShowListMobile(false)} className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer">  <div className="text-gray w-[50px] flex items-center justify-center">
         {surahData?.makkia ? (
           <LiaKaabaSolid className="size-6" />
         ) : (
           <FaMosque className="size-4" />
         )}
       </div></li>
-            <li className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><div className="text-gray font-bold">
+            <li onClick={()=> setShowListMobile(false)} className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><div className="text-gray font-bold">
         {isCurrent ? formatTime(duration) : surahData?.duration || "--:--"}
       </div></li>
           </ul>

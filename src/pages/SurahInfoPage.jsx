@@ -1,4 +1,3 @@
-
 import SurahListItem from "../components/uncommen/SurahListItem";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -15,6 +14,7 @@ import avatar from '../assets/images/avtr.png';
 import PlayButton from "../components/commen/PlayButton";
 import { IoIosMore } from "react-icons/io";
 import { requestManager } from "../utility/requestManager";
+import { Helmet } from "react-helmet-async";
 
 
 
@@ -152,6 +152,28 @@ if (error) {
 
   return (
     <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
+      <Helmet>
+        <title>{reciterObj?.[0]?.name ? `${reciterObj?.[0]?.name} | Qurani` : "Surah | Qurani"}</title>
+        <meta
+          name="description"
+          content={
+            reciterObj?.[0]
+              ? `Read and listen to Chapter(Surah) ${reciterObj?.[0]?.name} from the Holy Quran. Learn about its meaning, translation, and recitation.`
+              : "Read and listen to any Surah from the Holy Quran. Learn about its meaning, translation, and recitation."
+          }
+        />
+        <link rel="canonical" href={`https://qurani-opal.vercel.app/surah?q=${reciterObj?.[0]?.id || ""}`} />
+        <meta name="robots" content="index, follow" />
+        {/* Open Graph */}
+        <meta property="og:title" content={reciterObj?.[0] ? `${reciterObj?.[0]?.name} | Qurani` : "Surah | Qurani"} />
+        <meta property="og:description" content={
+          reciterObj?.[0]
+            ? `Read and listen to Surah ${reciterObj?.[0]?.name} from the Holy Quran. Learn about its meaning, translation, and recitation.`
+            : "Read and listen to any Surah from the Holy Quran. Learn about its meaning, translation, and recitation."
+        } />
+        <meta property="og:url" content={`https://qurani-opal.vercel.app/surah?q=${reciterObj?.[0]?.id || ""}`} />
+        <meta property="og:image" content="/quranLogo.svg" />
+      </Helmet>
       {isLoading || isFetching || !reciterObj ? (
         /* Skeleton Loading State */
         <>
@@ -218,8 +240,8 @@ if (error) {
                       <div className="mt-5">
           {quranTxt && <QuranReader data={quranTxt} />}
           </div>
-            <div className="list mt-4 px-5 py-4">
-              <h3 className="text-3xl font-bold text-heading capitalize mb-6">
+            <div className="list mt-4 px-1 sm:px-5 py-4">
+              <h3 className="text-lg sm:text-3xl max-sm:px-3 font-bold text-heading capitalize mb-4 sm:mb-6">
                 {lang === 'eng' ? 'Surah Reciters' : ' قراء السورة'}
               </h3>
               <div className="surah-list flex flex-col gap-3  ">
