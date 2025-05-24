@@ -72,12 +72,7 @@ const AllReciters = () => {
 
 
 
- const result = data?.reciters?.map((sura) => {
-      console.log(`<url>
-    <loc>https://qurani-opal.vercel.app/reciter?q=${sura?.id}</loc>
-    <priority>0.8</priority>
-  </url>`);
-      });
+
 
   if (error) {
     return (
