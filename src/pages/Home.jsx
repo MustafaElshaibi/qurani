@@ -38,7 +38,7 @@ const Home = () => {
   const reciters = useMemo(() => {
     if (data?.reciters) {
       // const initialReciters = data.reciters.slice(0, 6);
-      const initialReciters = data?.reciters?.filter((reciter)=> [253, 20, 5, 81, 102, 92, 54].includes(reciter?.id) && reciter)
+      const initialReciters = data?.reciters?.filter((reciter)=> [253, 20, 5, 81, 102, 92, 54, 201, 40, 307, 51].includes(reciter?.id) && reciter)
       return initialReciters;
     }
     return [];
