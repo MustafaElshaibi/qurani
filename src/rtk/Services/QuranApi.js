@@ -2,14 +2,15 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const quranApi = createApi({
   reducerPath: "quranApi",
-  refetchOnMountOrArgChange: true,
   refetchOnReconnect: true,
+   keepUnusedDataFor: 3600,
   baseQuery: fetchBaseQuery({
     baseUrl: "https://mp3quran.net/api/v3",
   }),
   endpoints: (builder) => ({
     getAllReciters: builder.query({
       query: (lang) => `/reciters?language=${lang}&reciter=168`,
+      keepUnusedDataFor: 3600, 
     }),
     getReciter: builder.query({
       query: ({ id, lang }) => `/reciters?language=${lang}&reciter=${id}`,

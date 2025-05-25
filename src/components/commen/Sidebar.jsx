@@ -35,7 +35,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="sidebar bg-second-black overflow-y-auto overflow-x-hidden rounded-lg p-2 sm:p-4  sticky top-[100px] max-h-[calc(100vh-100px)] sm:w-[300px] lg:w-[400px] xl:w-[500px] w-[70px] transition-all duration-300 [&::-webkit-scrollbar]:appearance-none [&::-webkit-scrollbar]:w-0">
+      <div className="sidebar bg-second-black overflow-y-auto overflow-x-hidden rounded-lg p-2 sm:p-4  sticky top-[90px] max-h-[calc(100vh-90px)] sm:w-[300px] lg:w-[400px] xl:w-[500px] w-[70px] transition-all duration-300 [&::-webkit-scrollbar]:appearance-none [&::-webkit-scrollbar]:w-0">
         <div className="flex flex-col gap-4">
           <RxHamburgerMenu
             onClick={() => setShowOnMobile(!showOnMobile)}
@@ -44,9 +44,9 @@ const Sidebar = () => {
 
           <div className="liblary hidden sm:block">
             <div className="top flex flex-col sm:flex-row justify-between items-center mt-2 mb-4 gap-2">
-              <h3 className="text-gray text-nowrap font-bold text-xs sm:text-xl opacity-85">
+              <h1 className="text-gray text-nowrap font-bold text-xs sm:text-xl opacity-85">
                 {lang === 'eng' ? 'Your Libraries' : "مكتباتك"}
-              </h3>
+              </h1>
               <button
                 onClick={() => setIsCreating(true)}
                 className="text-white hover:text-btns transition-colors"

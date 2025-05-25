@@ -68,7 +68,7 @@ export default function Header() {
           className="flex items-center justify-center size-10  rounded-full bg-main-black p-1 hover:bg-main-black/90 transition-colors focus:outline-none ring-2 ring-white"
         >
           {/* <FaQuran className="text-main-black size-5" /> */}
-          <img src={logo} alt="Logo" className="size-10" />
+          <img src={logo} alt="Logo" loading="lazy" title="logo" className="size-10" />
 
         </Link>
 

@@ -3,8 +3,8 @@ import { memo, useEffect, useState } from "react";
 import avatar from '../../assets/images/avtr.png';
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-
-
+import { LazyLoadImage} from 'react-lazy-load-image-component';
+ import 'react-lazy-load-image-component/src/effects/blur.css';
 
 export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -14,18 +14,22 @@ export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
 
 
 
+
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
     const fetchImage = async () => {
-      if (!reciter?.name) return;
-      
+      if (!reciter?.name || img !== avatar) return;
+
       try {
-        const reciterObj = await requestManager.getReciterInfo(reciter.id, reciter.name);
-        const { img  } = reciterObj;
-        if (isMounted && img) {
-          setImg(img);
+        const reciterObj = await requestManager.getReciterInfo(
+          reciter.id,
+          reciter.name,
+          { signal: controller.signal }
+        );
+        if (isMounted && reciterObj?.img) {
+          setImg(reciterObj.img);
         }
       } catch (error) {
         if (isMounted) setImg(avatar);
@@ -40,7 +44,7 @@ export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
       isMounted = false;
       controller.abort();
     };
-  }, [reciter, requestManager, dispatch]);
+  }, [reciter?.id, requestManager, dispatch]);
 
   
 

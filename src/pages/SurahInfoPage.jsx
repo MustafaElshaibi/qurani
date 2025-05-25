@@ -164,6 +164,7 @@ if (error) {
         />
         <link rel="canonical" href={`https://qurani-opal.vercel.app/surah?q=${reciterObj?.[0]?.id || ""}`} />
         <meta name="robots" content="index, follow" />
+            <meta name="keywords" content={`Quran, Qurani, Holy Quran, Listen Quran, Read Quran, Surah, Reciters, Islamic, Islam, Quran Audio, Quran App, ${reciterObj?.[0]?.name} Download Quran, Elshaibi`}/>
         {/* Open Graph */}
         <meta property="og:title" content={reciterObj?.[0] ? `${reciterObj?.[0]?.name} | Qurani` : "Surah | Qurani"} />
         <meta property="og:description" content={

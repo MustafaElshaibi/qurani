@@ -2,12 +2,12 @@ import { lazy, Suspense, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { listenToAuthChanges } from "./rtk/Reducers/AuthReducer";
 import { Outlet, Route, Routes } from "react-router-dom";
-import PageLoader from "./components/uncommen/PageLoader";
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from "@vercel/analytics/react";
 
 // Lazy-loaded components
 import Header from "./components/commen/Header";
+const PageLoader = lazy(()=> import("./components/uncommen/PageLoader"));
 const Player = lazy(() => import("./components/commen/Player"));
 import Sidebar from "./components/commen/Sidebar";
 import IsAuth from "./auth/IsAuth";
@@ -50,7 +50,7 @@ function App() {
                 <Header />
                 <div className="hero flex gap-1.5 mx-1 my-1 top-[100px]  h-screen"> 
                   <Sidebar />
-                  <div className="main-display w-full min-h-screen overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:appearance-none">
+                  <div className="main-display w-full min-h-screen overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:appearance-none [&::-webkit-scrollbar]:w-0">
                     <Suspense
                       fallback={
                         <div className="h-screen flex items-center justify-center ">

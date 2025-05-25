@@ -1,9 +1,9 @@
-import {  useEffect,  useMemo,  useState } from "react";
+import {    useMemo } from "react";
 import { useGetAllRecitersQuery, useGetAllSurahDetailsQuery } from "../rtk/Services/QuranApi";
 import { RoundedCard } from "../components/uncommen/RoundedCard";
 import  SquarCard  from "../components/uncommen/SquarCard";
 import { FiChevronRight } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import PageLoader from "../components/uncommen/PageLoader";
 import { requestManager } from "../utility/requestManager";
 import { Helmet } from "react-helmet-async";
@@ -13,8 +13,14 @@ import { Helmet } from "react-helmet-async";
 
 const Home = () => {
   const lang = useSelector((state) => state.lang);
-  const { data, loading, error, isFetching , refetch } = useGetAllRecitersQuery(lang);
-  const {data: suwarData, isFetching: fetchSuwar, isLoading: isLoadSuwar } = useGetAllSurahDetailsQuery(lang);
+  const { data, loading, error, isFetching , refetch } = useGetAllRecitersQuery(lang, {
+    refetchOnFocus: false,
+    refetchOnMountOrArgChange: false,
+  });
+  const {data: suwarData, isFetching: fetchSuwar, isLoading: isLoadSuwar } = useGetAllSurahDetailsQuery(lang, {
+    refetchOnFocus: false,
+    refetchOnMountOrArgChange: false,
+  });
   const loader = loading || isLoadSuwar;
   
     
@@ -28,9 +34,11 @@ const Home = () => {
 
 
   // set initial reciters when data is available
+  // 253 20 81 5 102 92 54
   const reciters = useMemo(() => {
     if (data?.reciters) {
-      const initialReciters = data.reciters.slice(0, 6);
+      // const initialReciters = data.reciters.slice(0, 6);
+      const initialReciters = data?.reciters?.filter((reciter)=> [253, 20, 5, 81, 102, 92, 54].includes(reciter?.id) && reciter)
       return initialReciters;
     }
     return [];
@@ -73,7 +81,6 @@ const Home = () => {
               : "قرآن, قرآني, استماع القرآن, قراءة القرآن, سور, قراء, إسلام, تطبيق القرآن, Elshaibi"
           }
         />
-        <meta name="author" content="Elshaibi" />
         <meta name="robots" content="index, follow" />
         {/* Open Graph tags */}
         <meta property="og:title" content={lang === "eng" ? "Qurani | a Holy Quran Platform" : "قرآني | منصة قرأنية متكاملة"} />
