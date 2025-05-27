@@ -38,7 +38,7 @@ const LanguageBtn = ({classname}) => {
     // Update document direction when language changes
     document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
     // You can also update the lang attribute
-    document.documentElement.lang = currentLang;
+    document.documentElement.lang = currentLang == "eng" ? "en" : "ar";
   }, [currentLang]);
 
 
