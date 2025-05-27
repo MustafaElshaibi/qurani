@@ -1,4 +1,21 @@
 User-agent: *
-Allow: /
+Allow: /$
+Allow: /chapters$
+Allow: /reciters$
+Allow: /surah/
+Allow: /reciter/
+Allow: /live$
+Disallow: /register
+Disallow: /login
+Disallow: /profile
+Disallow: /settings
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /test/
+Disallow: /*?
+Disallow: /*.pdf$
+Disallow: /*.zip$
+Crawl-delay: 10
 
 Sitemap: https://qurani-opal.vercel.app/sitemap.xml
