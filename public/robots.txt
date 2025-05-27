@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /$
+Allow: /sitemap.xml
 Allow: /chapters$
 Allow: /reciters$
 Allow: /surah/
