@@ -75,10 +75,10 @@ function App() {
 
             {/* Public Routes */}
             <Route path="/reciters" element={<AllReciters />} />
-            <Route path="/reciter" element={<ListSurahOfReciter />} />
+            <Route path="/reciter/:reciterId" element={<ListSurahOfReciter />} />
             <Route path="/library/:libraryId" element={<LibraryContent />} />
-            <Route path="/search" element={<ListSurahOfReciter />} />
-            <Route path="/surah" element={<SurahInfoPage />} />
+            <Route path="/search/:reciterId" element={<ListSurahOfReciter />} />
+            <Route path="/surah/:surahId" element={<SurahInfoPage />} />
             <Route path="/chapters" element={<AllSurah />} />
             <Route path="/live" element={<YouTubeLive />} />
           </Route>

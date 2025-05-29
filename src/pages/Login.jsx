@@ -78,24 +78,6 @@ function Login() {
 
   return (
     <>
-      <Helmet>
-        <title>Login | Qurani</title>
-        <meta name="description" content="Sign in to your Qurani account to access your bookmarks, progress, and personalized Quran features." />
-        <meta name="robots" content="noindex, follow" />
-        <meta name="author" content="Elshaibi" />
-        <link rel="canonical" href="https://qurani-opal.vercel.app/login" />
-        {/* Open Graph */}
-        <meta property="og:title" content="Login | Qurani" />
-        <meta property="og:description" content="Sign in to your Qurani account to access your bookmarks, progress, and personalized Quran features." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://qurani-opal.vercel.app/login" />
-        <meta property="og:image" content="/quranLogo.svg" />
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Login | Qurani" />
-        <meta name="twitter:description" content="Sign in to your Qurani account to access your bookmarks, progress, and personalized Quran features." />
-        <meta name="twitter:image" content="/quranLogo.svg" />
-      </Helmet>
     <div className="bg-second-black py-20 px-5 mx-auto min-h-screen w-full ">
       <div className="login  flex flex-col items-center max-sm:w-[350px] mx-auto sm:w-[500px]  ">
         <div className="logo flex items-center justify-center w-[40px] h-[40px] rounded-full bg-heading p-1 ">

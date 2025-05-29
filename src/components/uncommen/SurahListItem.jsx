@@ -141,6 +141,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
                 <img
                   src={surahData?.reciter?.imgUrl}
                   alt={surahData?.reciter?.name}
+                  loading="lazy"
                   className="w-full h-full object-cover rounded-lg"
                 />
                 
@@ -166,7 +167,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
           :
           (
             <Link
-            to={`/surah?q=${surahData?.surahId}`} 
+            to={`/surah/${surahData?.surahId}`} 
             className={`text-ellipsis overflow-hidden text-sm sm:text-xl text-nowrap max-sm:max-w-25  ${
               isCurrent ? (onFavorite ? 'text-pink-600' : "text-green" ): "text-heading"
             }`}

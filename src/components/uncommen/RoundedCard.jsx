@@ -50,7 +50,7 @@ export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
 
   return (
     <Link
-    to={`/reciter?q=${reciter?.id}`} 
+    to={`/reciter/${reciter?.id}`} 
       className={`group p-4  rounded-lg hover:bg-hover-black  transition-all duration-200 cursor-pointer ${loading && 'pointer-events-none'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

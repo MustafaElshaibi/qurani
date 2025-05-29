@@ -2,7 +2,7 @@ import { MdVerified } from "react-icons/md";
 import { IoIosMore } from "react-icons/io";
 import PlayButton from "../components/commen/PlayButton";
 import SurahListItem from "../components/uncommen/SurahListItem";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   useGetAllSurahDetailsQuery,
   useGetReciterQuery,
@@ -15,14 +15,14 @@ import { requestManager } from "../utility/requestManager";
 import PageLoader from "../components/uncommen/PageLoader";
 import { IoLocationSharp } from "react-icons/io5";
 import { Helmet } from "react-helmet-async";
+import SEO from "../components/uncommen/HelmetHeader";
 
 function ListSurahOfReciter() {
-  const [searchParams] = useSearchParams();
-  const qurey = searchParams.get("q") || "";
+  const { reciterId } = useParams();
   const [isSticky, setIsSticky] = useState(false);
   const lang = useSelector((state) => state.lang);
   const { data, isLoading, isFetching, error, refetch } = useGetReciterQuery({
-    id: qurey,
+    id: reciterId,
     lang,
   });
   const { data: suwarData } = useGetAllSurahDetailsQuery(lang);
@@ -95,7 +95,7 @@ function ListSurahOfReciter() {
     const handleScroll = () => {
       // Get current scroll position (equivalent to window.scrollY for the element)
       const scrollTop = reciterDiv.scrollTop;
-      setIsSticky(scrollTop > 200);
+      setIsSticky(scrollTop > 100);
     };
 
     reciterDiv.addEventListener("scroll", handleScroll);
@@ -149,72 +149,31 @@ function ListSurahOfReciter() {
 
   return (
     <>
-      <Helmet>
-        <title>
-          {reciter?.name
+      <SEO
+        title={
+          reciter?.name
             ? `${reciter.name} | Reciter | Qurani`
-            : "Reciter | Qurani"}
-        </title>
-        <meta
-          name="description"
-          content={
-            reciterInfo?.description
-              ? `${reciter?.name} - ${reciterInfo.description.slice(0, 150)}`
-              : `Listen to recitations and explore chapters by ${reciter?.name || "this reciter"} on Qurani.`
-          }
-        />
-        <meta
-          name="keywords"
-          content={`Quran, Qurani, Reciter, ${reciter?.name || ""}, Quran Audio, Islamic, Islam, Qari, Elshaibi`}
-        />
-        <meta name="author" content="Elshaibi" />
-        <link
-          rel="canonical"
-          href={`https://qurani-opal.vercel.app/reciter?q=${reciter?.id || ""}`}
-        />
-        <meta name="robots" content="index, follow" />
-        {/* Open Graph */}
-        <meta
-          property="og:title"
-          content={
-            reciter?.name
-              ? `${reciter.name} | Reciter | Qurani`
-              : "Reciter | Qurani"
-          }
-        />
-        <meta
-          property="og:description"
-          content={
-            reciterInfo?.description
-              ? `${reciter?.name} - ${reciterInfo.description.slice(0, 150)}`
-              : `Listen to recitations and explore chapters by ${reciter?.name || "this reciter"} on Qurani.`
-          }
-        />
-        <meta
-          property="og:url"
-          content={`https://qurani-opal.vercel.app/reciter?q=${reciter?.id || ""}`}
-        />
-        <meta property="og:image" content={reciterInfo?.img || "/quranLogo.svg"} />
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={
-            reciter?.name
-              ? `${reciter.name} | Reciter | Qurani`
-              : "Reciter | Qurani"
-          }
-        />
-        <meta
-          name="twitter:description"
-          content={
-            reciterInfo?.description
-              ? `${reciter?.name} - ${reciterInfo.description.slice(0, 150)}`
-              : `Listen to recitations and explore chapters by ${reciter?.name || "this reciter"} on Qurani.`
-          }
-        />
-        <meta name="twitter:image" content={reciterInfo?.img || "/quranLogo.svg"} />
-      </Helmet>
+            : "Reciter | Qurani"
+        }
+        description={
+          reciterInfo?.description
+            ? `${reciter?.name} - ${reciterInfo.description.slice(0, 150)}`
+            : `Listen to recitations and explore chapters by ${
+                reciter?.name || "this reciter"
+              } on Qurani.`
+        }
+        keywords={`Quran, Qurani, Reciter, ${
+          reciter?.name || ""
+        }, Quran Audio, Islamic, Islam, Qari, Elshaibi`}
+        candonical={`https://qurani-opal.vercel.app/reciter?q=${
+          reciter?.id || ""
+        }`}
+        url={`https://qurani-opal.vercel.app/reciter?q=${reciter?.id || ""}`}
+        img={"/quranLogo.png"}
+        name={"Qurani"}
+        type={"Reciter"}
+        robots={"index, follow"}
+      />
       <div className="flex reciter flex-col bg-second-black rounded-lg  w-full min-h-screen ">
         {isLoading || isFetching ? (
           /* Skeleton Loading State */
@@ -276,7 +235,9 @@ function ListSurahOfReciter() {
                 {reciterInfo?.country && (
                   <span className="text-sm font-normal flex items-center  text-gray-400 capitalize ml-2">
                     {reciterInfo?.country}{" "}
-                    <span><IoLocationSharp className="text-pink-600 size-4" /></span>
+                    <span>
+                      <IoLocationSharp className="text-pink-600 size-4" />
+                    </span>
                   </span>
                 )}
               </span>

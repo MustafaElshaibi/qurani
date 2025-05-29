@@ -17,7 +17,8 @@ const SearchInput = ({ onSearch, className, refSe, setSearch, mobile, onFocus })
   const loacation = useLocation();
 
   useEffect(()=> {
-    if (loacation.pathname !== "/search") {
+    console.log(location.pathname.includes("/search"))
+    if (!loacation.pathname.includes("/search") && !location.pathname.includes("/surah")) {
       setQuery("");
     }
   }, [loacation.pathname])

@@ -1,20 +1,18 @@
 import SurahListItem from "../components/uncommen/SurahListItem";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   useGetAllRecitersQuery,
   useGetAllSurahDetailsQuery,
   useGetSvgSurahQuery,
 } from "../rtk/Services/QuranApi";
-import {  useEffect,  useState } from "react";
-import { ErrorPage } from "./Error";
+import {   useEffect,    useState } from "react";
 import {  useSelector } from "react-redux";
 import { CiMusicNote1 } from "react-icons/ci";
 import QuranReader from "../components/uncommen/QuranReader";
 import avatar from '../assets/images/avtr.png';
-import PlayButton from "../components/commen/PlayButton";
-import { IoIosMore } from "react-icons/io";
 import { requestManager } from "../utility/requestManager";
 import { Helmet } from "react-helmet-async";
+import SEO from "../components/uncommen/HelmetHeader";
 
 
 
@@ -22,29 +20,37 @@ import { Helmet } from "react-helmet-async";
 
 
 function SurahInfoPage() {
-  const [surahParms] = useSearchParams();
-  const query = surahParms.get('q').split('_') || '';
-  const id = query?.[0];
+  const {surahId} = useParams();
   const [isSticky, setIsSticky] = useState(false);
   const lang = useSelector((state)=> state.lang);
   const { data: recitersData, error, refetch, isLoading, isFetching } = useGetAllRecitersQuery(lang);
-  const {data: quranTxt} = useGetSvgSurahQuery(id);
+  const {data: quranTxt} = useGetSvgSurahQuery(surahId);
     const { data: suwarData } = useGetAllSurahDetailsQuery(lang);
   const [reciterObj, setReciterObj] = useState([]);
 
 
+ 
 
 
 
 
-  // handel grandinat on scroll
+  // Handle sticky header on scroll (throttled)
   useEffect(() => {
+    // Get the target element
+    const reciterDiv = document.querySelector(".main-display ");
+    if (!reciterDiv) return;
+
     const handleScroll = () => {
-      setIsSticky(window.scrollY > 100);
+      // Get current scroll position (equivalent to window.scrollY for the element)
+      const scrollTop = reciterDiv.scrollTop;
+      setIsSticky(scrollTop > 100);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    reciterDiv.addEventListener("scroll", handleScroll);
+    return () => {
+      // Cleanup: remove event listener and clear timeout
+      reciterDiv.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
 
@@ -57,20 +63,20 @@ useEffect(() => {
   const abortController = new AbortController();
 
   const fetchReciterSurahData = async () => {
-    if (!recitersData?.reciters?.length || !suwarData?.suwar?.length || !id) return;
+    if (!recitersData?.reciters?.length || !suwarData?.suwar?.length || !surahId) return;
 
-    const currentSurah = suwarData.suwar.find((surah) => surah.id == id);
+    const currentSurah = suwarData.suwar.find((surah) => surah.id == surahId);
     if (!currentSurah) return;
 
     // Initial data with placeholder images
     const initialData = recitersData.reciters
       .filter(reciter => {
         const moshaf = reciter?.moshaf?.[0];
-        return moshaf?.surah_list?.split(',').map(s => s.trim()).includes(id.toString());
+        return moshaf?.surah_list?.split(',').map(s => s.trim()).includes(surahId.toString());
       })
       .map(reciter => {
         const moshaf = reciter.moshaf[0];
-        const formattedId = id.toString().padStart(3, '0');
+        const formattedId = surahId.toString().padStart(3, '0');
         const baseUrl = moshaf.server.endsWith('/') ? moshaf.server : `${moshaf.server}/`;
 
         return {
@@ -130,7 +136,7 @@ useEffect(() => {
     isMounted = false;
     abortController.abort();
   };
-}, [recitersData, id, suwarData]);
+}, [recitersData, surahId, suwarData]);
 
 
 if (error) {
@@ -150,31 +156,19 @@ if (error) {
   );
 }
 
+console.log(reciterObj)
   return (
-    <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
-      <Helmet>
-        <title>{reciterObj?.[0]?.name ? `${reciterObj?.[0]?.name} | Qurani` : "Surah | Qurani"}</title>
-        <meta
-          name="description"
-          content={
-            reciterObj?.[0]
+    <>
+    <SEO title={reciterObj?.[0]?.name ? `Chapter of ${reciterObj?.[0]?.name} | Qurani` : "Surah | Qurani"} description={ reciterObj?.[0]
               ? `Read and listen to Chapter(Surah) ${reciterObj?.[0]?.name} from the Holy Quran. Learn about its meaning, translation, and recitation.`
-              : "Read and listen to any Surah from the Holy Quran. Learn about its meaning, translation, and recitation."
-          }
-        />
-        <link rel="canonical" href={`https://qurani-opal.vercel.app/surah?q=${reciterObj?.[0]?.id || ""}`} />
-        <meta name="robots" content="index, follow" />
-            <meta name="keywords" content={`Quran, Qurani, Holy Quran, Listen Quran, Read Quran, Surah, Reciters, Islamic, Islam, Quran Audio, Quran App, ${reciterObj?.[0]?.name} Download Quran, Elshaibi`}/>
-        {/* Open Graph */}
-        <meta property="og:title" content={reciterObj?.[0] ? `${reciterObj?.[0]?.name} | Qurani` : "Surah | Qurani"} />
-        <meta property="og:description" content={
-          reciterObj?.[0]
-            ? `Read and listen to Surah ${reciterObj?.[0]?.name} from the Holy Quran. Learn about its meaning, translation, and recitation.`
-            : "Read and listen to any Surah from the Holy Quran. Learn about its meaning, translation, and recitation."
-        } />
-        <meta property="og:url" content={`https://qurani-opal.vercel.app/surah?q=${reciterObj?.[0]?.id || ""}`} />
-        <meta property="og:image" content="/quranLogo.svg" />
-      </Helmet>
+              : "Read and listen to any Surah from the Holy Quran. Learn about its meaning, translation, and recitation."} 
+              type={"Chapter"}
+              name={"Qurani"}
+              candonical={`https://qurani-opal.vercel.app/surah/${reciterObj?.[0]?.surahId || ""}`}
+              robots={"index, follow"}
+              url={`https://qurani-opal.vercel.app/surah/${reciterObj?.[0]?.surahId || ""}`}
+              img={'/quranLogo.png'} />
+    <div className="flex flex-col bg-second-black rounded-lg  w-full min-h-screen ">
       {isLoading || isFetching || !reciterObj ? (
         /* Skeleton Loading State */
         <>
@@ -263,6 +257,7 @@ if (error) {
         </>
       )}
     </div>
+    </>
   );
 }
 

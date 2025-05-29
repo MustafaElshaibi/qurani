@@ -94,7 +94,7 @@ const Home = () => {
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://qurani-opal.vercel.app/" />
-        <meta property="og:image" content="/quranLogo.svg" />
+        <meta property="og:image" content="/quranLogo.png" />
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={lang === "eng" ? "Qurani | a Holy Quran Platform" : "قرآني | منصة قرأنية متكاملة"} />
@@ -106,7 +106,7 @@ const Home = () => {
               : "اقرأ واستمع وتعلم القرآن الكريم عبر الإنترنت. اكتشف أشهر القراء والسور على قرآني."
           }
         />
-        <meta name="twitter:image" content="/quranLogo.svg" />
+        <meta name="twitter:image" content="/quranLogo.png" />
         <link rel="canonical" href="https://qurani-opal.vercel.app/" />
    </Helmet>
     <div className="w-full bg-[#121212] rounded-lg p-6 space-y-8 min-h-screen">

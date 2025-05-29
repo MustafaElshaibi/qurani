@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 
   return (
     <Link
-    to={`/surah?q=${surah?.id}`} 
+    to={`/surah/${surah?.id}`} 
       className={`group p-4  rounded-md hover:bg-hover-black transition-all duration-200 cursor-pointer ${isLoading && 'pointer-events-none'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
