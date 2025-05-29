@@ -14,5 +14,9 @@ Disallow: /api/
 Disallow: /admin/
 Disallow: /private/
 Disallow: /test/
+<<<<<<< HEAD
+=======
+Crawl-delay: 10
+>>>>>>> 1b15ca5a922847e4f4b0e5dd2f23b53082aeab78
 
 Sitemap: https://qurani-opal.vercel.app/sitemap.xml
