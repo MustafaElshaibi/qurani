@@ -13,8 +13,6 @@
       "destination": "/robots.txt"
     }
   ],
-  "cleanUrls": true,
-  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
