@@ -43,10 +43,11 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
 
   // play/pause track when clicked
   const handlePlayClick = () => {
-    if(!token) {
-      setShowSignInModal(true);
-      return;
-    } 
+    // Check if user is authenticated
+    // if(!token) {
+    //   setShowSignInModal(true);
+    //   return;
+    // } 
     if (isCurrent) {
       // Toggle play/pause for current track
       dispatch(togglePlayPause());
@@ -208,7 +209,7 @@ function SurahListItem({ index, surahData, audioQueue , onFavorite, onSurah}) {
 {/* list on mobile for download fav ..etc  */}
       {
         showListMobile && (
-           <div className="absolute bottom-5 right-3 w-37 z-30 bg-search-dark rounded-lg shadow-sm py-2 transition-all duration-300 origin-top">
+           <div className={`absolute bottom-5 ${lang === 'ar' ? 'left-3' : 'right-3'} w-37 z-30 bg-search-dark rounded-lg shadow-sm py-2 transition-all duration-300 origin-top`}>
           <ul className="text-white">
             <li onClick={()=> setShowListMobile(false)} className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Download</span> <DownloadSurah className={'block!'} surah={surahData} /></li>
             <li onClick={()=> setShowListMobile(false)} className="hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-between text-shadow-md  cursor-pointer"><span>Like</span> <HeartFavorite className={'block!'} song={surahData} /></li>

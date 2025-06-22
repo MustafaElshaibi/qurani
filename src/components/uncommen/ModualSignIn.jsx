@@ -5,8 +5,8 @@ const ModualSignIn = ({ isOpen, onClose, onSignIn }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50  z-50 flex items-center justify-center p-4 transition-all duration-300">
-      <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
+    <div className="fixed inset-0 bg-black/50  z-[1000] flex items-center justify-center p-4 transition-all duration-300">
+      <div className="bg-white rounded-xl z-50 max-w-md w-full shadow-xl">
         {/* Modal Content */}
         <div className="p-6 text-center">
           {/* Icon */}

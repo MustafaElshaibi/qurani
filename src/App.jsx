@@ -34,6 +34,7 @@ function App() {
 
   useEffect(() => {
     dispatch(listenToAuthChanges());
+    document.body.style.overflowX = "hidden"; // Prevent horizontal scroll
     
   }, [dispatch]);
 
@@ -43,7 +44,7 @@ function App() {
      <Analytics />
      <AccessibilityEnhancements />
       {/* <Home /> */}
-      <div className="min-h-screen">
+      <div className="min-h-screen ">
         <Routes>
           <Route
             path="/"

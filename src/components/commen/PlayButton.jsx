@@ -27,13 +27,15 @@ function PlayButton({surahQueue}) {
       context: 'playList'
     }))
   }
+
   return (
-   <>
+    <>
+    
     <ModualSignIn
-        isOpen={showSignInModal}
-        onClose={() => setShowSignInModal(false)}
-        onSignIn={() => navigate('/login')}
-      />
+      isOpen={showSignInModal}
+      onClose={() => setShowSignInModal(false)}
+      onSignIn={() => navigate('/login')}
+    />
     <div onClick={handlePlayList} className={`play  rounded-full hover:bg-green-500 bg-green-400  cursor-pointer flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16  shadow-lg hover:shadow-xl`}>
     <FaPlay className='text-black size-4 sm:size-6' />
   </div>

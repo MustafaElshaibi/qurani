@@ -44,7 +44,7 @@ const LanguageBtn = ({classname}) => {
 
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative " ref={dropdownRef}>
     <button
       onClick={toggleDropdown}
       className={`lang max-sm:mt-[180px] max-sm:mx-auto sm:mt-8 p-1 sm:px-3 w-fit sm:py-2 flex items-center max-sm:justify-center gap-2 text-white cursor-pointer border-2 border-white rounded-full ${classname}`}
@@ -69,7 +69,7 @@ const LanguageBtn = ({classname}) => {
     </button>
 
     {isOpen && (
-      <div className={`absolute bottom-full   ${lang === 'eng' ? 'left-0' : 'right-0'} mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-xl py-2`}>
+      <div className={`absolute bottom-full z-40   ${lang === 'eng' ? 'left-0' : 'right-0'} mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-xl py-2`}>
         <div className="flex flex-col">
           {languages.map((lang) => (
             <button

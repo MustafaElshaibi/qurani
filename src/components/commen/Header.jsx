@@ -356,7 +356,7 @@ export default function Header() {
   const handleLogout = () => {
     dispatch(logOut());
     closeMenu();
-    navigate("/login");
+    navigate("/");
     window.location.reload();
   };
 

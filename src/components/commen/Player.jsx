@@ -175,7 +175,7 @@ const Player = () => {
     try {
       const data = requestManager.getReciterInfo(currentSurah?.reciter?.id, currentSurah?.reciter?.name);
       const img = data?.img ? data.img : currentSurah?.reciter?.imgUrl;
-      console.log(img)
+     
       return img;
     } catch (error) {
       console.error("Error fetching reciter image:", error);
@@ -209,7 +209,6 @@ const Player = () => {
     )
   }
   if(!currentSurah) return null;
-  if (!token) return null;
 
   return (
     <>
