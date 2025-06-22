@@ -95,7 +95,7 @@ const AllSurah = () => {
                 {lang === "eng" ? "Chapters" : "جميع السور"}
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {suwar.map((surah , i) => (
                 <SquarCard key={i} isFetching={isFetching} isLoading={isLoading} surah={surah} />
               ))}

@@ -12,6 +12,7 @@ const Player = lazy(() => import("./components/commen/Player"));
 import Sidebar from "./components/commen/Sidebar";
 import IsAuth from "./auth/IsAuth";
 import ProtectAuthPages from "./auth/ProtectAuthPages";
+import AccessibilityEnhancements from "./components/commen/AccessibilityEnhancements";
 const Home = lazy(() => import("./pages/Home"));
 const ListSurahOfReciter = lazy(() => import("./pages/ListSurahOfReciter"));
 const Login = lazy(() => import("./pages/Login"));
@@ -40,6 +41,7 @@ function App() {
     <>
     <SpeedInsights />
      <Analytics />
+     <AccessibilityEnhancements />
       {/* <Home /> */}
       <div className="min-h-screen">
         <Routes>

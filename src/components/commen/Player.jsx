@@ -30,6 +30,8 @@ import { LiaKaabaSolid } from "react-icons/lia";
 import HeartFavorite from "../uncommen/HeartFavorite";
 import { IoIosArrowDown } from "react-icons/io";
 import Cookies from "universal-cookie";
+import { useLocation } from "react-router-dom";
+import { requestManager } from "../../utility/requestManager";
 const cookies = new Cookies();
 
 const Player = () => {
@@ -39,6 +41,7 @@ const Player = () => {
   // Add a ref to store previous volume
   const previousVolumeRef = useRef(1); // Default to max volume
   const dispatch = useDispatch();
+  const location = useLocation();
   const {
     currentSurah,
     isPlaying,
@@ -57,6 +60,49 @@ const Player = () => {
   useEffect(() => {
     audioService.initialize(store);
   }, []);
+
+  //  Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          dispatch(togglePlayPause());
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          dispatch(setCurrentTime(+currentTime - 5));
+          audioService.seekTo(+currentTime - 5);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          dispatch(setCurrentTime(+currentTime + 5));
+          audioService.seekTo(+currentTime + 5);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          dispatch(setVolume(volume + 0.1));
+          audioService.setVolume(volume + 0.1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          dispatch(setVolume(volume - 0.1));
+          audioService.setVolume(volume - 0.1);
+          break;
+        case 'm':
+        case 'M':
+          setMute(!mute);
+          break;
+      }
+    };
+
+    window.addEventListener('popstate', ()=> setShowFull(false))
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  });
 
   // Handle play/pause
   useEffect(() => {
@@ -115,7 +161,7 @@ const Player = () => {
 
   const handleSeek = (e) => {
     const time = parseFloat(e.target.value);
-    setCurrentTime(time);
+    dispatch(setCurrentTime(time));
     audioService.seekTo(time);
   };
 
@@ -125,7 +171,44 @@ const Player = () => {
     audioService.setVolume(newVolume);
   };
 
-  if (!currentSurah) return null;
+  const handleImg = ()=> {
+    try {
+      const data = requestManager.getReciterInfo(currentSurah?.reciter?.id, currentSurah?.reciter?.name);
+      const img = data?.img ? data.img : currentSurah?.reciter?.imgUrl;
+      console.log(img)
+      return img;
+    } catch (error) {
+      console.error("Error fetching reciter image:", error);
+      return currentSurah?.reciter?.imgUrl;
+    }
+  }
+
+  if ((!currentSurah && location.pathname === "/") ) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-second-black border-t border-gray/20 h-21">
+    <div className="container mx-auto px-4 h-full flex items-center">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
+        <div className="w-12 h-12 bg-gray/20 rounded-lg animate-shimmer"></div>
+        <div className="min-w-0 flex-1">
+          <div className="h-4 bg-gray/20 rounded mb-2 w-1/2 animate-shimmer"></div>
+          <div className="h-3 bg-gray/20 rounded w-1/3 animate-shimmer"></div>
+        </div>
+      </div>
+      <div className="flex items-center gap-4 mx-8">
+        <div className="w-8 h-8 bg-gray/20 rounded-full animate-shimmer"></div>
+        <div className="w-10 h-10 bg-gray/20 rounded-full animate-shimmer"></div>
+        <div className="w-8 h-8 bg-gray/20 rounded-full animate-shimmer"></div>
+      </div>
+      <div className="flex items-center gap-4 flex-1 max-w-md">
+        <div className="w-10 h-3 bg-gray/20 rounded animate-shimmer"></div>
+        <div className="flex-1 h-1 bg-gray/20 rounded animate-shimmer"></div>
+        <div className="w-10 h-3 bg-gray/20 rounded animate-shimmer"></div>
+      </div>
+    </div>
+  </div>
+    )
+  }
+  if(!currentSurah) return null;
   if (!token) return null;
 
   return (
@@ -133,22 +216,20 @@ const Player = () => {
       {isPlayerShown ? (
         <>
           {/* on large screens */}
-          <div className="player flex items-center bg-search-dark h-[110px] fixed bottom-0 left-0 w-full px-14 py-5 gap-14 z-40 max-sm:flex-col max-sm:hidden">
+          <div className="player flex items-center  bg-search-dark h-[110px] fixed bottom-0 left-0 w-full px-12 py-4 gap-14 z-40 max-sm:flex-col max-sm:hidden">
             <IoIosArrowDown
               onClick={() => setIsPlayerShown(!isPlayerShown)}
               className="size-5 text-white absolute right-4 cursor-pointer top-2 z-10"
             />
             <div className="surah-info flex items-center gap-4 max-sm:hidden ">
-              <div className="img w-[90px] h-[90px] overflow-hidden rounded-lg  ">
-                {currentSurah?.reciter?.imgUrl ? (
+              <div className="img w-[90px] h-[90px] overflow-hidden rounded-lg   ">
+                
                   <img
-                    src={currentSurah?.reciter?.imgUrl}
+                    src={handleImg()}
                     alt=""
-                    className="max-w-full"
+                    className=" w-[90px] h-[90px] object-cover rounded-lg"
                   />
-                ) : (
-                  <div className="max-w-full h-full bg-gray animate-pulse"></div>
-                )}
+               
               </div>
               <div className="info overflow-hidden flex-1/3">
                 <div className="surah-title text-heading text-lg">
@@ -159,7 +240,7 @@ const Player = () => {
                 </div>
               </div>
               <div className="detailes">
-                <HeartFavorite song={currentSurah} />
+                {currentSurah && <HeartFavorite song={currentSurah} />}
               </div>
             </div>
 
@@ -312,7 +393,7 @@ const Player = () => {
           {/* on small screens  */}
           <div
             className={`player transition-all   duration-300 flex items-center  bg-search-dark  fixed bottom-0 left-0 w-full   z-40  sm:hidden ${
-              showFull ? "h-screen flex-col justify-between" : "h-[80px]"
+              showFull ? "h-screen flex-col justify-between" : "h-[70px]"
             }`}
           >
             {/* small bar in bottom   */}
@@ -330,21 +411,12 @@ const Player = () => {
                   onClick={() => setShowFull(!showFull)}
                   className={`one cursor-pointer  items-center gap-3  grow flex`}
                 >
-                  {currentSurah?.reciter?.imgUrl ? (
+                
                     <img
-                      src={currentSurah?.reciter?.imgUrl}
-                      alt=""
-                      className="w-[60px]  rounded-lg h-[60px] "
+                      src={handleImg()}
+                      alt={currentSurah?.reciter?.name}
+                      className="w-[60px]  rounded-lg object-cover h-[60px] "
                     />
-                  ) : (
-                    <div className="text-gray w-[60px] bg-main-black rounded-lg h-[60px] animate-pulse flex items-center justify-center">
-                      {currentSurah?.makkia ? (
-                        <LiaKaabaSolid className="size-7" />
-                      ) : (
-                        <FaMosque className="size-7" />
-                      )}
-                    </div>
-                  )}
                   <div className="block overflow-hidden">
                     <div className="surah-title text-heading text-lg flex items-center justify-center ">
                       {currentSurah?.name}
@@ -416,34 +488,26 @@ const Player = () => {
 
             {/* full player for mobile */}
             <div
-              className={`surah-info grow w-full p-5 transition-all duration-500 flex flex-col items-center gap-4 ${
+              className={`surah-info grow w-full p-5 transition-all duration-500 flex flex-col items-center justify-center gap-19 ${
                 showFull ? "block" : "max-sm:hidden"
               }`}
             >
-              <div className="flex items-center justify-between w-full mb-2 mt-8">
+            <div className="w-full">
+                <div className="flex items-center justify-between w-full mb-7 mt-8">
                 <IoIosArrowDown
                   onClick={() => setShowFull(!showFull)}
                   className="text-white cursor-pointer size-6 "
                 />
                 <GoKebabHorizontal className="text-white cursor-pointer size-6 " />
               </div>
-              {currentSurah?.reciter?.imgUrl ? (
                 <img
-                  src={currentSurah?.reciter?.imgUrl}
-                  alt=""
-                  className="w-full h-[300px] rounded-lg object-cover"
+                  src={handleImg()}
+                  alt={currentSurah?.reciter?.name}
+                  className="w-full h-[300px] rounded-lg object-cover mb-4 shadow-lg"
                 />
-              ) : (
-                <div className="text-gray w-full h-[400px] bg-main-black rounded-lg  animate-pulse flex items-center justify-center">
-                  {currentSurah?.makkia ? (
-                    <LiaKaabaSolid className="size-18" />
-                  ) : (
-                    <FaMosque className="size-18" />
-                  )}
-                </div>
-              )}
+             
               <div
-                className={`info flex items-center justify-between mt-2 w-full`}
+                className={`info flex items-center justify-between px-5 mt-2 w-full`}
               >
                 <div className="block overflow-hidden">
                   <div className="surah-title text-heading text-lg">
@@ -453,11 +517,11 @@ const Player = () => {
                     {currentSurah?.reciter?.name}
                   </div>
                 </div>
-                <HeartFavorite song={currentSurah} />
+                <HeartFavorite song={currentSurah}  className={'!block'}/>
               </div>
             </div>
 
-            <div
+              <div
               className={`player-cont mb-2 p-2 w-full cursor-pointer ${
                 showFull ? "block" : "hidden"
               }`}
@@ -555,6 +619,9 @@ const Player = () => {
                 </div>
               </div>
             </div>
+            </div>
+
+            
           </div>
         </>
       ) : (
@@ -594,3 +661,347 @@ const formatTime = (seconds) => {
 };
 
 export default Player;
+
+
+
+
+
+
+
+
+
+
+// import { useState, useEffect, useRef, useCallback } from 'react';
+// import { useSelector, useDispatch } from 'react-redux';
+// import { 
+//   BiPlay, 
+//   BiPause, 
+//   BiSkipNext, 
+//   BiSkipPrevious,
+//   BiVolumeFull,
+//   BiVolumeMute,
+//   BiShuffle,
+//   BiRepeat,
+//   BiDownload,
+//   BiExpand,
+//   BiCollapse
+// } from 'react-icons/bi';
+// import { RiSpeedLine } from 'react-icons/ri';
+
+// const Player = () => {
+//   const [isPlaying, setIsPlaying] = useState(false);
+//   const [currentTime, setCurrentTime] = useState(0);
+//   const [duration, setDuration] = useState(0);
+//   const [volume, setVolume] = useState(1);
+//   const [isMuted, setIsMuted] = useState(false);
+//   const [playbackRate, setPlaybackRate] = useState(1);
+//   const [isMinimized, setIsMinimized] = useState(false);
+//   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  
+//   const audioRef = useRef(null);
+//   const progressRef = useRef(null);
+//   const speedMenuRef = useRef(null);
+  
+//   const { currentTrack, queue, isShuffled, repeatMode } = useSelector(state => state.player);
+//   const lang = useSelector(state => state.lang);
+//   const dispatch = useDispatch();
+
+//   // Playback speed options
+//   const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+//   // Keyboard shortcuts
+//   useEffect(() => {
+//     const handleKeyPress = (e) => {
+//       if (e.target.tagName === 'INPUT') return;
+      
+//       switch (e.key) {
+//         case ' ':
+//           e.preventDefault();
+//           togglePlayPause();
+//           break;
+//         case 'ArrowLeft':
+//           e.preventDefault();
+//           seekBackward();
+//           break;
+//         case 'ArrowRight':
+//           e.preventDefault();
+//           seekForward();
+//           break;
+//         case 'ArrowUp':
+//           e.preventDefault();
+//           adjustVolume(0.1);
+//           break;
+//         case 'ArrowDown':
+//           e.preventDefault();
+//           adjustVolume(-0.1);
+//           break;
+//         case 'm':
+//         case 'M':
+//           toggleMute();
+//           break;
+//       }
+//     };
+
+//     document.addEventListener('keydown', handleKeyPress);
+//     return () => document.removeEventListener('keydown', handleKeyPress);
+//   }, []);
+
+//   // Audio event handlers
+//   useEffect(() => {
+//     const audio = audioRef.current;
+//     if (!audio) return;
+
+//     const updateTime = () => setCurrentTime(audio.currentTime);
+//     const updateDuration = () => setDuration(audio.duration);
+//     const handleEnded = () => {
+//       setIsPlaying(false);
+//       // Handle next track logic here
+//     };
+
+//     audio.addEventListener('timeupdate', updateTime);
+//     audio.addEventListener('loadedmetadata', updateDuration);
+//     audio.addEventListener('ended', handleEnded);
+
+//     return () => {
+//       audio.removeEventListener('timeupdate', updateTime);
+//       audio.removeEventListener('loadedmetadata', updateDuration);
+//       audio.removeEventListener('ended', handleEnded);
+//     };
+//   }, [currentTrack]);
+
+//   const togglePlayPause = useCallback(() => {
+//     const audio = audioRef.current;
+//     if (!audio) return;
+
+//     if (isPlaying) {
+//       audio.pause();
+//     } else {
+//       audio.play();
+//     }
+//     setIsPlaying(!isPlaying);
+//   }, [isPlaying]);
+
+//   const seekBackward = () => {
+//     const audio = audioRef.current;
+//     if (audio) {
+//       audio.currentTime = Math.max(0, audio.currentTime - 10);
+//     }
+//   };
+
+//   const seekForward = () => {
+//     const audio = audioRef.current;
+//     if (audio) {
+//       audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+//     }
+//   };
+
+//   const adjustVolume = (delta) => {
+//     const newVolume = Math.max(0, Math.min(1, volume + delta));
+//     setVolume(newVolume);
+//     if (audioRef.current) {
+//       audioRef.current.volume = newVolume;
+//     }
+//   };
+
+//   const toggleMute = () => {
+//     setIsMuted(!isMuted);
+//     if (audioRef.current) {
+//       audioRef.current.muted = !isMuted;
+//     }
+//   };
+
+//   const handleProgressClick = (e) => {
+//     const audio = audioRef.current;
+//     const progressBar = progressRef.current;
+//     if (!audio || !progressBar) return;
+
+//     const rect = progressBar.getBoundingClientRect();
+//     const clickX = e.clientX - rect.left;
+//     const newTime = (clickX / rect.width) * duration;
+//     audio.currentTime = newTime;
+//   };
+
+//   const changePlaybackSpeed = (speed) => {
+//     setPlaybackRate(speed);
+//     if (audioRef.current) {
+//       audioRef.current.playbackRate = speed;
+//     }
+//     setShowSpeedMenu(false);
+//   };
+
+//   const formatTime = (time) => {
+//     if (isNaN(time)) return '0:00';
+//     const minutes = Math.floor(time / 60);
+//     const seconds = Math.floor(time % 60);
+//     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+//   };
+
+//   if (!currentTrack) return null;
+
+//   return (
+//     <>
+//       <audio
+//         ref={audioRef}
+//         src={currentTrack.audioUrl}
+//         onPlay={() => setIsPlaying(true)}
+//         onPause={() => setIsPlaying(false)}
+//       />
+      
+//       <div className={`fixed bottom-0 left-0 right-0 bg-second-black border-t border-gray/20 transition-all duration-300 z-40 ${
+//         isMinimized ? 'h-16' : 'h-24'
+//       }`}>
+//         <div className="container mx-auto px-4 h-full flex items-center">
+//           {/* Track Info */}
+//           <div className="flex items-center gap-4 min-w-0 flex-1">
+//             <div className="w-12 h-12 bg-search-dark rounded-lg flex items-center justify-center flex-shrink-0">
+//               <BiPlay className="text-green text-xl" />
+//             </div>
+//             <div className="min-w-0 flex-1">
+//               <h4 className="text-heading font-medium truncate">
+//                 {currentTrack.title}
+//               </h4>
+//               <p className="text-gray text-sm truncate">
+//                 {currentTrack.reciter}
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* Controls */}
+//           <div className="flex items-center gap-4 mx-8">
+//             <button
+//               onClick={() => {/* Previous track logic */}}
+//               className="text-gray hover:text-heading transition-colors"
+//               aria-label="Previous track"
+//             >
+//               <BiSkipPrevious className="text-2xl" />
+//             </button>
+            
+//             <button
+//               onClick={togglePlayPause}
+//               className="w-10 h-10 bg-green rounded-full flex items-center justify-center hover:bg-green/90 transition-colors"
+//               aria-label={isPlaying ? 'Pause' : 'Play'}
+//             >
+//               {isPlaying ? (
+//                 <BiPause className="text-black text-xl" />
+//               ) : (
+//                 <BiPlay className="text-black text-xl ml-0.5" />
+//               )}
+//             </button>
+            
+//             <button
+//               onClick={() => {/* Next track logic */}}
+//               className="text-gray hover:text-heading transition-colors"
+//               aria-label="Next track"
+//             >
+//               <BiSkipNext className="text-2xl" />
+//             </button>
+//           </div>
+
+//           {/* Progress Bar */}
+//           {!isMinimized && (
+//             <div className="flex items-center gap-4 flex-1 max-w-md">
+//               <span className="text-gray text-sm min-w-[40px]">
+//                 {formatTime(currentTime)}
+//               </span>
+//               <div
+//                 ref={progressRef}
+//                 onClick={handleProgressClick}
+//                 className="flex-1 h-1 bg-gray/30 rounded-full cursor-pointer group"
+//               >
+//                 <div
+//                   className="h-full bg-green rounded-full relative group-hover:bg-green/80 transition-colors"
+//                   style={{ width: `${(currentTime / duration) * 100}%` }}
+//                 >
+//                   <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+//                 </div>
+//               </div>
+//               <span className="text-gray text-sm min-w-[40px]">
+//                 {formatTime(duration)}
+//               </span>
+//             </div>
+//           )}
+
+//           {/* Additional Controls */}
+//           <div className="flex items-center gap-2 ml-4">
+//             {/* Speed Control */}
+//             <div className="relative" ref={speedMenuRef}>
+//               <button
+//                 onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+//                 className="text-gray hover:text-heading transition-colors p-2"
+//                 aria-label="Playback speed"
+//               >
+//                 <RiSpeedLine className="text-xl" />
+//                 <span className="text-xs absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+//                   {playbackRate}x
+//                 </span>
+//               </button>
+              
+//               {showSpeedMenu && (
+//                 <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-search-dark border border-gray/20 rounded-lg shadow-xl py-2 min-w-[80px]">
+//                   {speedOptions.map(speed => (
+//                     <button
+//                       key={speed}
+//                       onClick={() => changePlaybackSpeed(speed)}
+//                       className={`w-full px-4 py-2 text-sm hover:bg-hover-black transition-colors ${
+//                         speed === playbackRate ? 'text-green' : 'text-gray'
+//                       }`}
+//                     >
+//                       {speed}x
+//                     </button>
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
+
+//             {/* Volume Control */}
+//             <div className="flex items-center gap-2">
+//               <button
+//                 onClick={toggleMute}
+//                 className="text-gray hover:text-heading transition-colors"
+//                 aria-label={isMuted ? 'Unmute' : 'Mute'}
+//               >
+//                 {isMuted || volume === 0 ? (
+//                   <BiVolumeMute className="text-xl" />
+//                 ) : (
+//                   <BiVolumeFull className="text-xl" />
+//                 )}
+//               </button>
+//               <input
+//                 type="range"
+//                 min="0"
+//                 max="1"
+//                 step="0.1"
+//                 value={isMuted ? 0 : volume}
+//                 onChange={(e) => {
+//                   const newVolume = parseFloat(e.target.value);
+//                   setVolume(newVolume);
+//                   setIsMuted(newVolume === 0);
+//                   if (audioRef.current) {
+//                     audioRef.current.volume = newVolume;
+//                     audioRef.current.muted = newVolume === 0;
+//                   }
+//                 }}
+//                 className="w-20 h-1 bg-gray/30 rounded-full appearance-none cursor-pointer slider"
+//               />
+//             </div>
+
+//             {/* Minimize/Expand */}
+//             <button
+//               onClick={() => setIsMinimized(!isMinimized)}
+//               className="text-gray hover:text-heading transition-colors"
+//               aria-label={isMinimized ? 'Expand player' : 'Minimize player'}
+//             >
+//               {isMinimized ? (
+//                 <BiExpand className="text-xl" />
+//               ) : (
+//                 <BiCollapse className="text-xl" />
+//               )}
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default Player;

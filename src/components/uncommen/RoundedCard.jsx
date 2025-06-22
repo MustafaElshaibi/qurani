@@ -3,8 +3,6 @@ import { memo, useEffect, useState } from "react";
 import avatar from '../../assets/images/avtr.png';
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { LazyLoadImage} from 'react-lazy-load-image-component';
- import 'react-lazy-load-image-component/src/effects/blur.css';
 
 export const RoundedCard = memo(({reciter, loading,  requestManager }) => {
   const [isHovered, setIsHovered] = useState(false);

@@ -4,6 +4,7 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { memo } from "react";
 
 const HeartFavorite = ({ song, className }) => {
+  console.log(song)
   const isFavorite = useSelector(state => selectIsFavorite(state, song.id));
   const dispatch = useDispatch();
 

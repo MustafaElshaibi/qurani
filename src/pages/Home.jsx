@@ -185,7 +185,7 @@ const Home = () => {
               </button>
              
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {suwar.slice(0, 6).map((surah , i) => (
                 <SquarCard key={i} isFetching={fetchSuwar} isLoading={isLoadSuwar} surah={surah} />
               ))}
