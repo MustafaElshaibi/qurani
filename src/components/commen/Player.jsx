@@ -183,7 +183,7 @@ const Player = () => {
     }
   }
 
-  if ((!currentSurah && location.pathname === "/") ) {
+  if ((!currentSurah && location.pathname === "/" && !token) ) {
     return (
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-second-black border-t border-gray/20 h-21">
     <div className="container mx-auto px-4 h-full flex items-center">

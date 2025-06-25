@@ -64,10 +64,18 @@ body {
 
 @import "tailwindcss";
 @import "./assets/font/stylesheet.css";
+
+/* Set default font for all */
 * {
-  font-family: 'Spotify Mix';
+  font-family: 'Spotify Mix', sans-serif;
 }
-  @theme {
+
+/* Use Circular Std Medium for Arabic only */
+html[lang="ar"] * {
+  font-family: 'Circular Std Medium', 'Spotify Mix', sans-serif !important;
+}
+
+@theme {
   --color-btns: #F0F0F0;
   --color-main-black: #000000;
   --color-second-black: #121212;
@@ -79,13 +87,19 @@ body {
   --color-green: #1DB954;
 }
 
+html, body, #root {
+  overflow-x: hidden !important;
+}
+
 body {
   background-color: #000000;
 }
+
 [dir="rtl"] {
   direction: rtl;
   text-align: right;
 }
+
 .container {
   padding: 0 15px;
   margin: 0 auto;

@@ -44,7 +44,7 @@ function App() {
      <Analytics />
      <AccessibilityEnhancements />
       {/* <Home /> */}
-      <div className="min-h-screen ">
+      <div className="h-screen ">
         <Routes>
           <Route
             path="/"
