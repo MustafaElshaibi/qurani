@@ -11,12 +11,14 @@ const AdComponent = ({ adSlot }) => {
   }, []); // Empty dependency array means this runs once after mount
 
   return (
-    <ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4287607521320464"
-     data-ad-slot={adSlot}
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
+    <ins
+      className="adsbygoogle"
+      style={{ display: 'block' }}
+      data-ad-client="ca-pub-4287607521320464" // Replace with your client ID
+      data-ad-slot={adSlot} // Dynamic prop for ad unit slot
+      data-ad-format="auto"
+      data-full-width-responsive="true"
+    ></ins>
   );
 };
 
