@@ -7,6 +7,7 @@ import {  useSelector } from "react-redux";
 import PageLoader from "../components/uncommen/PageLoader";
 import { requestManager } from "../utility/requestManager";
 import { Helmet } from "react-helmet-async";
+import AdComponent from "../components/uncommen/AdComponent";
 
 
 
@@ -110,6 +111,7 @@ const Home = () => {
         <link rel="canonical" href="https://qurani-opal.vercel.app/" />
    </Helmet>
     <div className="w-full bg-[#121212] rounded-lg p-6 space-y-8 min-h-screen">
+      <AdComponent adSlot="6590166258" />
       {loader || isFetching  ? (
         <>
           {/* Popular Reciters Skeleton */}
