@@ -56,7 +56,7 @@ function App() {
                 <div className="hero flex gap-1.5 mx-1 my-1 top-[100px]  h-screen"> 
                   <Sidebar />
                   <div className="main-display w-full min-h-screen overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:appearance-none [&::-webkit-scrollbar]:w-0">
-                    <AdComponent adSlot={"6590166258"} />
+                    <AdComponent adSlot="6590166258" />
                     <Suspense
                       fallback={
                         <div className="h-screen flex items-center justify-center ">
