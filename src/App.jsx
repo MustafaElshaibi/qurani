@@ -28,6 +28,8 @@ const YouTubeLive = lazy(() => import("./pages/LiveList"));
 const Footer = lazy(() => import("./components/commen/Footer"));
 const ProfilePage = lazy(() => import("./pages/Profile"));
 const SettingsPage = lazy(() => import("./pages/Settings"));
+import AdComponent from "./components/uncommen/AdComponent";
+
 
 function App() {
   const dispatch = useDispatch();
@@ -54,6 +56,7 @@ function App() {
                 <div className="hero flex gap-1.5 mx-1 my-1 top-[100px]  h-screen"> 
                   <Sidebar />
                   <div className="main-display w-full min-h-screen overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:appearance-none [&::-webkit-scrollbar]:w-0">
+                    <AdComponent adSlot={"6590166258"} />
                     <Suspense
                       fallback={
                         <div className="h-screen flex items-center justify-center ">
